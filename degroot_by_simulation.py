@@ -102,5 +102,49 @@ def test_asymptotic_beliefs():
 			print("Test failed")
 
 
+def get_asymptotic_change_in_opinion(opinions, trust_matrix):
+	"""
+	Get the change in opinion of the agents at time t
+	"""
+	opinion_asymptotic = get_asymptotic_belief(opinions, trust_matrix)
+	return opinion_asymptotic - opinions
+
+
+def get_asymptotic_change_in_error(opinions, trust_matrix, truth):
+	"""
+	Get the change in error of the agents at time t
+	"""
+	errors = opinions - truth
+	error_asymptotic = get_asymptotic_belief(errors, trust_matrix)
+	return error_asymptotic - errors
+
+def test_asymptotic_change_in_opinion_and_error():
+	"""
+	Check that the change in opinion and change in error are equivalent
+	"""
+
+	truth = 1
+	n= 10
+	opinions = generate_random_opinions_lognormal(n, 0, 1)
+	trust_matrix = generate_random_trust_matrix(n)
+
+	changes_in_opinion = get_asymptotic_change_in_opinion(opinions, trust_matrix)
+	changes_in_error = get_asymptotic_change_in_error(opinions, trust_matrix, truth)
+
+	for i in range(n):
+		# Assert almost equal
+		if np.isclose(changes_in_opinion[i], changes_in_error[i]):
+			print("Test passed")
+		else:
+			print("Test failed")
+
+def get_asymptotic_change_in_crowd_error_squared(opinions, trust_matrix, truth):
+
+	crowd_error_0 = np.mean(opinions - truth)
+	crowd_error_t = np.mean(get_asymptotic_change_in_error(opinions, trust_matrix, truth))
+
+	return crowd_error_t**2 - crowd_error_0**2
+
+
 if __name__=="__main__":
-	test_asymptotic_beliefs()
+	test_asymptotic_change_in_opinion_and_error()
