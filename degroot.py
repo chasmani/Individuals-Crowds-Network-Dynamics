@@ -256,6 +256,148 @@ def test_change_in_indy_error_asymptotic_standardised():
 		print("Test failed")
 		print(mean_change_in_errors_standardised, analytic_change_in_errors_standardised)
 
+def get_one_step_influence_vector(W):
+
+	# Get the out-degree of each node
+	out_degree = np.sum(W, axis=0)
+	return out_degree
+
+def get_change_in_crowd_error_one_step(beliefs, W, truth):
+
+	influence_vector = get_one_step_influence_vector(W)
+	errors = beliefs - truth
+
+	covariance_influence_errors = np.real(np.cov(influence_vector, errors, bias=True)[0,1])
+
+	mean_error = np.mean(errors)
+
+	return covariance_influence_errors**2 + 2*mean_error*covariance_influence_errors
+
+
+def test_change_in_crowd_error_one_step():
+
+	n = 10
+	beliefs = generate_opinion_vector_random(n)
+	W = generate_stochastic_weights_matrix_random(n)
+	truth = 0.5
+	
+	next_beliefs = one_step_degroot(beliefs, W)
+
+	final_crowd_error = np.mean(next_beliefs - truth)**2
+	initial_crowd_error = np.mean(beliefs - truth)**2
+
+	change_in_crowd_error = final_crowd_error - initial_crowd_error
+
+	one_step_change_in_crowd_error = get_change_in_crowd_error_one_step(beliefs, W, truth)
+
+	if np.isclose(change_in_crowd_error, one_step_change_in_crowd_error):
+		print("Test passed")
+	else:
+		print("Test failed")
+
+def get_change_in_crowd_error_one_step_standardised(beliefs, W, truth):
+
+	influence_vector = get_one_step_influence_vector(W)
+	errors = beliefs - truth
+
+	correlation_influence_errors = np.corrcoef(influence_vector, errors)[0,1]
+
+	mean_error = np.mean(errors)
+
+	standardised_mean_error = mean_error/np.sqrt(np.var(errors))
+
+	coefficient_variation_w = np.sqrt(np.var(influence_vector))/np.mean(influence_vector)
+
+	return coefficient_variation_w**2 * correlation_influence_errors**2 + 2*standardised_mean_error*coefficient_variation_w*correlation_influence_errors
+
+def test_change_in_crowd_error_one_step_standardised():
+
+	n = 10
+	beliefs = generate_opinion_vector_random(n)
+	W = generate_stochastic_weights_matrix_random(n)
+	truth = 0.5
+	
+	next_beliefs = one_step_degroot(beliefs, W)
+
+	final_crowd_error = np.mean(next_beliefs - truth)**2
+	initial_crowd_error = np.mean(beliefs - truth)**2
+
+	change_in_crowd_error = final_crowd_error - initial_crowd_error
+	change_in_crowd_error_standardised = change_in_crowd_error/np.var(beliefs)
+
+	one_step_change_in_crowd_error_standardised = get_change_in_crowd_error_one_step_standardised(beliefs, W, truth)
+
+	if np.isclose(change_in_crowd_error_standardised, one_step_change_in_crowd_error_standardised):
+		print("Test passed")
+	else:
+		print("Test failed")
+		print(change_in_crowd_error_standardised, one_step_change_in_crowd_error_standardised)
+
+def get_indy_influence_vector(W, i):
+
+	# Get the in-degree of node i
+	in_vector = W[i,:]
+	return in_vector
+
+
+def get_change_in_indy_opinion_one_step(beliefs, W, i):
+	
+	n = len(beliefs)
+	w_i = get_indy_influence_vector(W, i)
+	covariance_w_i_beliefs = np.real(np.cov(w_i, beliefs, bias=True)[0,1])
+
+	return n * covariance_w_i_beliefs + np.mean(beliefs) - beliefs[i]
+
+def test_change_in_indy_opinion_one_step():
+
+	n = 10
+	beliefs = generate_opinion_vector_random(n)
+	W = generate_stochastic_weights_matrix_random(n)
+	
+	next_beliefs = one_step_degroot(beliefs, W)
+
+	change_in_opinion = next_beliefs - beliefs
+
+	for i in range(n):
+		one_step_change_in_opinion = get_change_in_indy_opinion_one_step(beliefs, W, i)
+
+		if not np.isclose(change_in_opinion[i], one_step_change_in_opinion):
+			print("Test failed")
+	print("Test passed")
+
+def get_change_in_indy_error_one_step(beliefs, W, truth, i):
+
+	n = len(beliefs)
+	w_i = get_indy_influence_vector(W, i)
+	errors = beliefs - truth
+	covariance_w_i_errors = np.real(np.cov(w_i, errors, bias=True)[0,1])
+	mean_error = np.mean(errors)
+	variance_error = np.var(errors)
+
+	return n**2 * covariance_w_i_errors**2 + 2*mean_error*n*covariance_w_i_errors + np.mean(errors)**2 - errors[i]**2
+
+def test_change_in_indy_error_one_step():
+
+	n = 10
+	beliefs = generate_opinion_vector_random(n)
+	W = generate_stochastic_weights_matrix_random(n)
+	truth = 0.5
+	
+	next_beliefs = one_step_degroot(beliefs, W)
+
+	final_errors = next_beliefs - truth
+	initial_errors = beliefs - truth
+
+	for i in range(n):
+		one_step_change_in_errors = get_change_in_indy_error_one_step(beliefs, W, truth, i)
+
+		if not np.isclose(final_errors[i]**2 - initial_errors[i]**2, one_step_change_in_errors):
+			print("Test failed")
+
+	print("Test passed")
+
+
+
 def test_all():
 
 	test_one_step_degroot()
@@ -265,6 +407,10 @@ def test_all():
 	test_change_in_crowd_error_asymptotic_standardised()
 	test_change_in_indy_error_asymptotic()
 	test_change_in_indy_error_asymptotic_standardised()
+	test_change_in_crowd_error_one_step()
+	test_change_in_crowd_error_one_step_standardised()
+	test_change_in_indy_opinion_one_step()
+	test_change_in_indy_error_one_step()
 
 
 
