@@ -1,0 +1,24 @@
+.DS_Store
+
+# Python
+*.pyc
+__pycache__/
+venv/
+env/
+dist/
+build/
+*.egg-info/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# R
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.Renviron
+.Rcheck/
+.Rd2pdf/
+.Rapp.history
+.RDataTmp/
