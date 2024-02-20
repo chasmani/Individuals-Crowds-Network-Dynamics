@@ -157,6 +157,69 @@ def test_change_in_crowd_error_asymptotic():
 	else:
 		print("Test failed")
 
+
+def get_change_in_crowd_error_asymptotic_intuitive_analytic(n, coskewness, cov_v_e2, mean_error):
+	covariance_v_e = (cov_v_e2-coskewness)/(2*mean_error)
+	return n**2 * covariance_v_e**2 + 2*mean_error*n*covariance_v_e
+
+def get_coskewness_unnormed(X, Y, Z):
+
+	n = len(X)
+	S = 0
+	for i in range(n):
+		S += (X[i] - np.mean(X)) * (Y[i] - np.mean(Y)) * (Z[i] - np.mean(Z))
+	return S/n
+
+def covariance_from_coskewness(X,Y):
+
+	n = len(X)
+	S = 0
+	for i in range(n):
+		S += (X[i] - np.mean(X)) * (Y[i] - np.mean(Y))**2
+	
+	coskewness = S/n
+	covariance_xy2 = np.real(np.cov(X, Y**2, bias=True)[0,1])
+	
+	return (covariance_xy2 - coskewness)/(2*np.mean(Y))
+
+def get_change_in_crowd_error_aymptotic_intuitive(beliefs, W, truth):
+
+	n = len(beliefs)
+	eigenweights = get_eigenweights(W)
+	errors = beliefs - truth
+	mean_error = np.mean(errors)
+	covariance_ve2 = np.real(np.cov(eigenweights, errors**2, bias=True)[0,1])
+	coskewness = get_coskewness_unnormed(eigenweights, errors, errors)
+
+	return get_change_in_crowd_error_asymptotic_intuitive_analytic(n, coskewness, covariance_ve2, mean_error)
+
+
+def test_change_in_crowd_error_asymptotic_intuitive():
+
+	n = 10
+	beliefs = generate_opinion_vector_random(n)
+	W = generate_stochastic_weights_matrix_random(n)
+	truth = 0.5
+	
+	asymptotic_beliefs = asymptotic_degroot(beliefs, W)
+
+	final_crowd_error = np.mean(asymptotic_beliefs - truth)**2
+	initial_crowd_error = np.mean(beliefs - truth)**2
+
+	change_in_crowd_error = final_crowd_error - initial_crowd_error
+
+	intuitive_change_in_crowd_error = get_change_in_crowd_error_aymptotic_intuitive(beliefs, W, truth)
+
+	if np.isclose(change_in_crowd_error, intuitive_change_in_crowd_error):
+		print("Test passed")
+	else:
+		print(change_in_crowd_error, intuitive_change_in_crowd_error)
+		print("Test failed")
+
+
+
+
+
 def get_change_in_crowd_error_asymptotic_standardised(coeff_variation_v, correlation_eigenweights_errors, mean_error_standardised):
 	
 	return coeff_variation_v**2 * correlation_eigenweights_errors**2 + 2*mean_error_standardised*coeff_variation_v*correlation_eigenweights_errors
@@ -500,6 +563,7 @@ def test_all():
 	test_asymptotic_degroot()
 	test_change_in_crowd_opinion_asymptotic()
 	test_change_in_crowd_error_asymptotic()
+	test_change_in_crowd_error_asymptotic_intuitive()
 	test_change_in_crowd_error_asymptotic_standardised()
 	test_change_in_indy_error_asymptotic()
 	test_change_in_indy_error_asymptotic_standardised()

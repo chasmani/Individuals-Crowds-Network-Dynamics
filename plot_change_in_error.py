@@ -7,12 +7,6 @@ from degroot import (
 	get_change_in_indy_error_asymptotic_standardised
 )
 
-"""
-Functions are in this form:
-def get_change_in_crowd_error_asymptotic_standardised(coeff_variation_v, correlation_eigenweights_errors, mean_error_standardised):
-get_change_in_indy_error_asymptotic_standardised(coeff_variation_v, correlation_v_e, mean_error_standardised)
-"""
-
 def plot_heatmap_standardised_crowd_asymptotic(z=0.1):
 
 	cors = np.linspace(-1,1,100)
@@ -40,7 +34,6 @@ def plot_heatmap_standardised_crowd_asymptotic(z=0.1):
 	plt.imshow(delta_error_squared, cmap='seismic', norm=divnorm, interpolation='nearest', aspect='auto', extent=[CCV_e.min(), CCV_e.max(), cors.min(), cors.max()], origin='lower')
 
 	plt.title("z={}".format(z))
-	
 
 
 def plot_heatmap_standardised_indy_asymptotic(z=0.1):
