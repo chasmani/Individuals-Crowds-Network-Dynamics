@@ -217,9 +217,6 @@ def test_change_in_crowd_error_asymptotic_intuitive():
 		print("Test failed")
 
 
-
-
-
 def get_change_in_crowd_error_asymptotic_standardised(coeff_variation_v, correlation_eigenweights_errors, mean_error_standardised):
 	
 	return coeff_variation_v**2 * correlation_eigenweights_errors**2 + 2*mean_error_standardised*coeff_variation_v*correlation_eigenweights_errors
@@ -235,6 +232,37 @@ def get_change_in_crowd_error_asymptotic_standardised_analytic(beliefs, W, truth
 	coefficient_variation_v = np.sqrt(np.var(eigenweights))/np.mean(eigenweights)
 
 	return coefficient_variation_v**2 * correlation_eigenweights_errors**2 + 2*standardised_mean_error*coefficient_variation_v*correlation_eigenweights_errors
+
+
+def get_change_in_crowd_error_asymptotic_standardised_analytic_expanded(beliefs, W, truth):
+
+	n = len(beliefs)
+	eigenweights = get_eigenweights(W)
+	errors = beliefs - truth
+	correlation_eigenweights_errors = np.corrcoef(errors, eigenweights)[0,1]   
+	mean_error = np.mean(errors)
+	standardised_mean_error = mean_error/np.sqrt(np.var(errors))
+	coefficient_variation_v = np.sqrt(np.var(eigenweights))/np.mean(eigenweights)
+
+	mean_error = np.mean(errors)
+
+	errors_squared = errors**2
+	distances = errors - mean_error
+	distances_squared = distances**2
+
+	sd_errors = np.sqrt(np.var(errors))
+	sd_errors_squared = np.sqrt(np.var(errors_squared))
+	sd_distances_squared = np.sqrt(np.var(distances_squared))
+
+	correlation_v_e2 = np.corrcoef(eigenweights, errors_squared)[0,1]
+	correlation_v_d2 = np.corrcoef(eigenweights, distances_squared)[0,1]
+
+	A = coefficient_variation_v**2/(4*mean_error**2)
+	B = sd_errors_squared * correlation_v_e2 - sd_distances_squared * correlation_v_d2
+	C = coefficient_variation_v * sd_errors_squared * correlation_v_e2 - coefficient_variation_v * sd_distances_squared * correlation_v_d2
+
+	return (A*(B**2) + C)/(sd_errors**2)
+
 
 def test_change_in_crowd_error_asymptotic_standardised():
 
@@ -258,6 +286,9 @@ def test_change_in_crowd_error_asymptotic_standardised():
 	else:
 		print("Test failed")
 		print(change_in_crowd_error_standardised, analytic_change_in_crowd_error_standardised)
+
+	anlaytic_b = get_change_in_crowd_error_asymptotic_standardised_analytic_expanded(beliefs, W, truth)
+	print(anlaytic_b, change_in_crowd_error_standardised)
 
 def get_change_in_indy_error_asymptotic(n, covariance_v_e, mean_error, variance_error):
 	return n**2 * covariance_v_e**2 + 2*mean_error*n*covariance_v_e - variance_error
@@ -574,9 +605,19 @@ def test_all():
 	test_change_in_indy_opinion_one_step()
 	test_change_in_indy_error_one_step()
 
+def check_results():
 
+	opinions = np.array([1,2])
+		# Random influnce network
+	W = np.array([
+			[0.5,0.5],
+			[0.5, 0.5]])
+		# Standardise the influence network
+		# Random truth
+	truth = 1
 
+	print(get_change_in_crowd_error_asymptotic_standardised_analytic(opinions, W, truth))
 
 
 if __name__=="__main__":
-	test_all()
+	check_results()

@@ -77,6 +77,11 @@ def covariance_from_coskewness_2(X,Y):
         S += (X[i] - np.mean(X)) * (Y[i] - np.mean(Y))**2
     
     coskewness = S/n
+
+    D = X - np.mean(X)
+    covariance_xd2 = np.real(np.cov(X, D**2, bias=True)[0,1])
+    print(covariance_xd2, coskewness)
+
     covariance_xy2 = np.real(np.cov(X, Y**2, bias=True)[0,1])
 	
     return (covariance_xy2 - coskewness)/(2*np.mean(Y))
@@ -122,5 +127,112 @@ def test_coskewness():
     print(np.real(np.cov(X, Y, bias=True)[0,1]))
     print(covariance_from_coskewness_2(X,Y))
 
+
+def get_covariance_from_covs_2(X,Y):
+
+    D = X - np.mean(X)
+    D_squared = D**2
+
+
+    
+
+def test_covars():
+
+    np.random.seed(1)
+
+    X = np.random.normal(0, 1, 100)
+    Y = np.random.normal(0, 1, 100)
+    truth = 0.4
+    E = X - truth
+    E_squared = E**2
+
+    D = X - np.mean(X)
+    D_squared = D**2
+
+    print("Here")
+    print(covariance(X, D**2) - covariance(X, E**2))
+    print(2 * np.mean(E) * covariance(X, E))
+
+    print(covariance(X,E))
+    print((covariance(X, D**2) - covariance(X, E**2))/(2*np.mean(E)))
+
+    print(covariance(X, D**2))
+    print(coskewness_unnormalised(X, E, E))
+
+
+
+
+
+    print(np.mean(E))
+
+    print(covariance(X, E_squared) - covariance(X, D_squared)/np.mean(E))
+
+    print(2*covariance(X, E))
+
+    print(coskewness_unnormalised(X, Y, Y))
+    print(covariance(X, D**2))
+
+    covariance_from_coskewness_2(X,Y)
+
+
+    covariance_xe = covariance(X, E_squared) - covariance(X, D_squared)/(2*np.mean(E))
+    print(covariance_xe)
+    print(covariance(X, E))
+
+def test_coskewness_and_covars():
+
+    np.random.seed(1)
+
+    X = np.random.normal(0, 1, 100)
+    Y = np.random.normal(0, 1, 100)
+
+    D = Y - np.mean(Y)
+
+    print(coskewness_unnormalised(X, Y, Y))
+    print(covariance(X, D**2))
+
+
+
+
+
+def test_coefficeint_var():
+
+    V = [0.1, 0.2,0.1,0.2,0.1,0.2, 0.1]
+
+    print(np.sum(V))
+
+    print(np.std(V))
+
+    print(np.std(V)/np.mean(V))
+
+    V_big = np.repeat(V, 10)
+    V_big = V_big/np.sum(V_big)
+
+    print(np.std(V_big))
+    print(np.std(V_big)/np.mean(V_big))
+
+
+def test_relationship_between_skewness_covariance():
+
+    np.random.seed(1)
+
+    X = np.random.normal(0, 1, 100)
+    Y = np.random.normal(0, 1, 100)
+
+    coskewness_unnormed = coskewness_unnormalised(X, Y, Y)
+    cov_xy2 = covariance(X, Y**2)
+    
+
+    print(coskewness_unnormed, cov_xy2)
+
+
+
+
+
+
+def test_variance_x_e_d():
+
+    pass
+
 if __name__ == "__main__":
-    test_coskewness()
+     test_coskewness_and_covars()
