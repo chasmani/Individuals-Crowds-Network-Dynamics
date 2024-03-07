@@ -1,35 +1,55 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
-from degroot import get_change_in_crowd_error_asymptotic_standardised_analytic_expanded
+import sys
+sys.path.append("..")
+from robust_benefits import get_asymptotic_change_in_crowd_error_standardised_expanded
+
+
 
 cv= 0.5
-z = 1
+mean_e = 1
 
 cor_v_e2s = np.linspace(-1,1,200)
 cor_v_d2s = np.linspace(-1,1,100)
 
-def get_change_in_error_squared(cor_ve2, cor_vd2, CV, mean_e):
-
-	A = CV**2/(4*mean_e**2)
-	B = cor_ve2 - cor_vd2
-	C = CV * cor_ve2 - CV * cor_vd2
-	
-	return A*(B**2) + C - 1
-
-
-
+std_e2 = 1
+std_d2 = 1
 
 delta_error_squared = np.zeros((len(cor_v_e2s), len(cor_v_d2s)))
+
+divnorm = mcolors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=2)
 
 for i, cor_ve2 in enumerate(cor_v_e2s):
 	for j, cor_vd2 in enumerate(cor_v_d2s):
 		
-		delta_error_squared[i, j] = get_change_in_error_squared(cor_ve2, cor_vd2, cv, z)
-		
-plt.imshow(delta_error_squared, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower')
-plt.xlabel("Herding --- Heterdoxy (correlation(v, d2)")
-plt.ylabel("Accuracy --- Inaccuracy (correlation(v, e2)")
+		delta_error_squared[i, j] = get_asymptotic_change_in_crowd_error_standardised_expanded(cv, cor_ve2, cor_vd2, mean_e, std_e2, std_d2)
+
+fig = plt.figure(figsize=(10,5))
+
+plt.subplot(1, 2, 1)		
+plt.imshow(delta_error_squared, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower',  extent=[-1, 1, -1, 1])
+plt.title("Crowd")
+plt.xlabel(r"Herding --- Heterdoxy / $s(d^2) cor(v, d^2)$")
+plt.ylabel(r"Wisdom --- Foolishness / $s(e^2) cor(e, d^2)$")
+
+
+plt.subplot(1, 2, 2)		
+plt.imshow(delta_error_squared - 1, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower',  extent=[-1, 1, -1, 1])
+plt.title("Individual")
+plt.xlabel(r"Herding --- Heterdoxy / $s(d^2) cor(v, d^2)$")
+plt.ylabel(r"Wisdom --- Foolishness / $s(e^2) cor(e, d^2)$")
+
+plt.tight_layout()
+
+fig.subplots_adjust(right=0.8)
+cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+sm = plt.cm.ScalarMappable(cmap='seismic', norm=divnorm)
+sm.set_array([])
+fig.colorbar(sm, cax=cbar_ax)
+
+plt.savefig("images/herding_vs_wisdom.png", dpi=300)
 
 plt.show()
