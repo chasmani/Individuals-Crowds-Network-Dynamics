@@ -6,17 +6,16 @@ Code, data and visualisations.
 
 The main important functions are included in python (robust_benefits.py).
 
-Each includes the following functions:
-1. get_asymptotic_change_in_crowd_error_standardised
-2. get_asymptotic_change_in_crowd_error_standardised_expanded
-
-3. get_asymptotic_change_in_individual_error_stanardised
-4. get_asymptotic_change_in_individual_error_standardised_expanded
+This includes functions to get the asymptotic changes in crowd and indivdiual errror in terms of influence-bias correaltions, and alternative functions to find the changes in error in terms of herding/heterodoxy and wisdom/foolishness. 
 
 ## Tests
 
-We include a folder to test these functions. The functions are tested against simulations. 
+We include tests of the analytic functions against simulations, in robust_benefits_tests.py. The simulation code is in robust_benefits_sim.py.
 
+## PLots
 
-- robust_beenfits.py
-- robust_beenfits.R
+Functions for plotting results are in the plots folder, which also contains saved plots in the images folder. 
+
+## Archive
+
+This is an archive of code used during development of the main ideas. We included it for reference purposes. 
