@@ -7,13 +7,11 @@ import sys
 sys.path.append("..")
 from robust_benefits import get_asymptotic_change_in_crowd_error_standardised_expanded
 
-
-
 cv= 0.5
 mean_e = 1
 
-cor_v_e2s = np.linspace(-1,1,200)
-cor_v_d2s = np.linspace(-1,1,100)
+cor_v_e2s = np.linspace(-1.5,1.5,200)
+cor_v_d2s = np.linspace(-1.5,1.5,100)
 
 std_e2 = 1
 std_d2 = 1
@@ -27,20 +25,18 @@ for i, cor_ve2 in enumerate(cor_v_e2s):
 		
 		delta_error_squared[i, j] = get_asymptotic_change_in_crowd_error_standardised_expanded(cv, cor_ve2, cor_vd2, mean_e, std_e2, std_d2)
 
-fig = plt.figure(figsize=(10,5))
+fig = plt.figure(figsize=(10,3))
 
 plt.subplot(1, 2, 1)		
-plt.imshow(delta_error_squared, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower',  extent=[-1, 1, -1, 1])
+plt.imshow(delta_error_squared, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower',  extent=[-1.5, 1.5, -1.5, 1.5])
 plt.title("Crowd")
 plt.xlabel(r"Herding --- Heterdoxy / $s(d^2) cor(v, d^2)$")
-plt.ylabel(r"Wisdom --- Foolishness / $s(e^2) cor(e, d^2)$")
-
+plt.ylabel(r"Wisdom --- Foolishness / $s(e^2) cor(v, e^2)$")
 
 plt.subplot(1, 2, 2)		
-plt.imshow(delta_error_squared - 1, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower',  extent=[-1, 1, -1, 1])
+plt.imshow(delta_error_squared - 1, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower',  extent=[-1.5, 1.5, -1.5, 1.5])
 plt.title("Individual")
 plt.xlabel(r"Herding --- Heterdoxy / $s(d^2) cor(v, d^2)$")
-plt.ylabel(r"Wisdom --- Foolishness / $s(e^2) cor(e, d^2)$")
 
 plt.tight_layout()
 

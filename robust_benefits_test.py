@@ -17,59 +17,62 @@ class TestCrowdErrorAsymptotic(unittest.TestCase):
 		The actual test.
 		Any method which starts with ``test_`` will considered as a test case.
 		"""
-		np.random.seed(1)
+		for seed in range(10):
+			np.random.seed(seed)
+			
 
-		opinions = np.array([1,2])
-		W = np.array([
-			[0.5,0.5],
-			[0.5, 0.5]])
-		truth = 1
-		# Run the simulation
-		sim_asym_change_crowd_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_crowd_error_standardised(opinions, W, truth)
+			opinions = np.array([1,2])
+			W = np.array([
+				[0.5,0.5],
+				[0.5, 0.5]])
+			truth = 1
+			# Run the simulation
+			sim_asym_change_crowd_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_crowd_error_standardised(opinions, W, truth)
 
-		v = get_eigenweights(W)
-		CV_v = np.std(v)/np.mean(v)
+			v = get_eigenweights(W)
+			CV_v = np.std(v)/np.mean(v)
 
-		e = opinions - truth
-		cor_v_e = np.corrcoef(v, e)[0,1]
-		z = np.mean(e)/np.std(e)  
+			e = opinions - truth
+			cor_v_e = np.corrcoef(v, e)[0,1]
+			z = np.mean(e)/np.std(e)  
 
-		# Run the function
-		func_asym_change_crowd_error_stnd = robust_benefits.get_asymptotic_change_in_crowd_error_standardised(CV_v, cor_v_e, z)
+			# Run the function
+			func_asym_change_crowd_error_stnd = robust_benefits.get_asymptotic_change_in_crowd_error_standardised(CV_v, cor_v_e, z)
 
-		assert np.isclose(sim_asym_change_crowd_error_stnd, func_asym_change_crowd_error_stnd)
-		
+			assert np.isclose(sim_asym_change_crowd_error_stnd, func_asym_change_crowd_error_stnd)
+			
 
 	def test_crowd_error_asymptotic_random(self):
 		"""
 		The actual test.
 		Any method which starts with ``test_`` will considered as a test case.
 		"""
-		np.random.seed(1)
+		for seed in range(10):
+			np.random.seed(seed)
 
-		n = 100
-		# Random opinions
-		opinions = np.random.rand(n)
-		# Random influnce network
-		W = np.random.rand(n,n)
-		# Standardise the influence network
-		W = W/W.sum(axis=1)[:,None]
-		# Random truth
-		truth = np.random.rand()
-		# Run the simulation
-		sim_asym_change_crowd_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_crowd_error_standardised(opinions, W, truth)
-		
-		v = get_eigenweights(W)
-		CV_v = np.std(v)/np.mean(v)
+			n = 100
+			# Random opinions
+			opinions = np.random.rand(n)
+			# Random influnce network
+			W = np.random.rand(n,n)
+			# Standardise the influence network
+			W = W/W.sum(axis=1)[:,None]
+			# Random truth
+			truth = np.random.rand()
+			# Run the simulation
+			sim_asym_change_crowd_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_crowd_error_standardised(opinions, W, truth)
+			
+			v = get_eigenweights(W)
+			CV_v = np.std(v)/np.mean(v)
 
-		e = opinions - truth
-		cor_v_e = np.corrcoef(v, e)[0,1]
-		z = np.mean(e)/np.std(e)  
+			e = opinions - truth
+			cor_v_e = np.corrcoef(v, e)[0,1]
+			z = np.mean(e)/np.std(e)  
 
-		# Run the function
-		func_asym_change_crowd_error_stnd = robust_benefits.get_asymptotic_change_in_crowd_error_standardised(CV_v, cor_v_e, z)
-		assert np.isclose(sim_asym_change_crowd_error_stnd, func_asym_change_crowd_error_stnd)
-		
+			# Run the function
+			func_asym_change_crowd_error_stnd = robust_benefits.get_asymptotic_change_in_crowd_error_standardised(CV_v, cor_v_e, z)
+			assert np.isclose(sim_asym_change_crowd_error_stnd, func_asym_change_crowd_error_stnd)
+			
 
 class TestIndyErrorAsymptotic(unittest.TestCase):
 
@@ -78,59 +81,62 @@ class TestIndyErrorAsymptotic(unittest.TestCase):
 		The actual test.
 		Any method which starts with ``test_`` will considered as a test case.
 		"""
-		np.random.seed(1)
+		for seed in range(10):
+			np.random.seed(seed)
 
-		opinions = np.array([1,2])
-		W = np.array([
-			[0.5,0.5],
-			[0.5, 0.5]])
-		truth = 1
-		# Run the simulation
-		sim_asym_change_indy_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_individual_error_standardised(opinions, W, truth)
+			opinions = np.array([1,2])
+			W = np.array([
+				[0.5,0.5],
+				[0.5, 0.5]])
+			truth = 1
+			# Run the simulation
+			sim_asym_change_indy_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_individual_error_standardised(opinions, W, truth)
 
-		v = get_eigenweights(W)
-		CV_v = np.std(v)/np.mean(v)
+			v = get_eigenweights(W)
+			CV_v = np.std(v)/np.mean(v)
 
-		e = opinions - truth
-		cor_v_e = np.corrcoef(v, e)[0,1]
-		z = np.mean(e)/np.std(e)  
+			e = opinions - truth
+			cor_v_e = np.corrcoef(v, e)[0,1]
+			z = np.mean(e)/np.std(e)  
 
-		# Run the function
-		func_asym_change_indy_error_stnd = robust_benefits.get_asymptotic_change_in_individual_error_standardised(CV_v, cor_v_e, z)
+			# Run the function
+			func_asym_change_indy_error_stnd = robust_benefits.get_asymptotic_change_in_individual_error_standardised(CV_v, cor_v_e, z)
 
-		assert np.isclose(sim_asym_change_indy_error_stnd, func_asym_change_indy_error_stnd)
-		
+			assert np.isclose(sim_asym_change_indy_error_stnd, func_asym_change_indy_error_stnd)
+			
 
-	def test_crowd_error_asymptotic_random(self):
+	def test_indy_error_asymptotic_random(self):
 		"""
 		The actual test.
 		Any method which starts with ``test_`` will considered as a test case.
 		"""
-		np.random.seed(1)
+		for seed in range(10):
+			np.random.seed(seed)
 
-		n = 100
-		# Random opinions
-		opinions = np.random.rand(n)
-		# Random influnce network
-		W = np.random.rand(n,n)
-		# Standardise the influence network
-		W = W/W.sum(axis=1)[:,None]
-		# Random truth
-		truth = np.random.rand()
-		# Run the simulation
-		sim_asym_change_indy_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_individual_error_standardised(opinions, W, truth)
 
-		v = get_eigenweights(W)
-		CV_v = np.std(v)/np.mean(v)
+			n = 100
+			# Random opinions
+			opinions = np.random.rand(n)
+			# Random influnce network
+			W = np.random.rand(n,n)
+			# Standardise the influence network
+			W = W/W.sum(axis=1)[:,None]
+			# Random truth
+			truth = np.random.rand()
+			# Run the simulation
+			sim_asym_change_indy_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_individual_error_standardised(opinions, W, truth)
 
-		e = opinions - truth
-		cor_v_e = np.corrcoef(v, e)[0,1]
-		z = np.mean(e)/np.std(e)  
+			v = get_eigenweights(W)
+			CV_v = np.std(v)/np.mean(v)
 
-		# Run the function
-		func_asym_change_indy_error_stnd = robust_benefits.get_asymptotic_change_in_individual_error_standardised(CV_v, cor_v_e, z)
+			e = opinions - truth
+			cor_v_e = np.corrcoef(v, e)[0,1]
+			z = np.mean(e)/np.std(e)  
 
-		assert np.isclose(sim_asym_change_indy_error_stnd, func_asym_change_indy_error_stnd)
+			# Run the function
+			func_asym_change_indy_error_stnd = robust_benefits.get_asymptotic_change_in_individual_error_standardised(CV_v, cor_v_e, z)
+
+			assert np.isclose(sim_asym_change_indy_error_stnd, func_asym_change_indy_error_stnd)
 
 
 class TestCrowdErrorAsymptoticExpanded(unittest.TestCase):
@@ -140,40 +146,93 @@ class TestCrowdErrorAsymptoticExpanded(unittest.TestCase):
 		The actual test.
 		Any method which starts with ``test_`` will considered as a test case.
 		"""
-		np.random.seed(1)
+		for seed in range(10):
+			np.random.seed(seed)
+			n = 100
+			# Random opinions
+			opinions = np.random.rand(n)
+			# Random influnce network
+			W = np.random.rand(n,n)
+			# Standardise the influence network
+			W = W/W.sum(axis=1)[:,None]
+			# Random truth
+			truth = np.random.rand()
+			# Run the simulation
+			sim_asym_change_crowd_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_crowd_error_standardised(opinions, W, truth)
+			
+			v = get_eigenweights(W)
+			CV_v = np.std(v)/np.mean(v)
 
-		n = 100
-		# Random opinions
-		opinions = np.random.rand(n)
-		# Random influnce network
-		W = np.random.rand(n,n)
-		# Standardise the influence network
-		W = W/W.sum(axis=1)[:,None]
-		# Random truth
-		truth = np.random.rand()
-		# Run the simulation
-		sim_asym_change_crowd_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_crowd_error_standardised(opinions, W, truth)
+			e = opinions - truth
+			e_2 = (opinions - truth)**2
+			d_2 = (opinions - np.mean(opinions))**2
+			cor_v_e_2 = np.corrcoef(v, e_2)[0,1]
+			cor_v_d_2 = np.corrcoef(v, d_2)[0,1]
+			mean_e = np.mean(e)
+
+			std_e2 = np.std(e_2)
+			std_d2 = np.std(d_2)
+			
+			# Run the function
+			func_asym_change_crowd_error_stnd = robust_benefits.get_asymptotic_change_in_crowd_error_expanded(
+				CV_v, cor_v_e_2, cor_v_d_2, mean_e, std_e2, std_d2)
+
+			std_e = np.std(e)
+
+			sim_asym_change_crowd_error = sim_asym_change_crowd_error_stnd * std_e**2
+
+			assert np.isclose(sim_asym_change_crowd_error, func_asym_change_crowd_error_stnd)
+
+
+class TestIndyErrorAsymptoticExpanded(unittest.TestCase):
+
+	def test_indy_error_asymptotic_expanded(self):
 		
-		v = get_eigenweights(W)
-		CV_v = np.std(v)/np.mean(v)
+		for seed in range(10):
+			np.random.seed(seed)
 
-		e = opinions - truth
-		e_2 = (opinions - truth)**2
-		d_2 = (opinions - np.mean(opinions))**2
-		cor_v_e_2 = np.corrcoef(v, e_2)[0,1]
-		cor_v_d_2 = np.corrcoef(v, d_2)[0,1]
-		mean_e = np.mean(e)
+			n = 100
+			# Random opinions
+			opinions = np.random.rand(n)
+			# Random influnce network
+			W = np.random.rand(n,n)
+			# Standardise the influence network
+			W = W/W.sum(axis=1)[:,None]
+			# Random truth
+			truth = np.random.rand()
 
-		std_e2 = np.std(e_2)
-		std_d2 = np.std(d_2)
-		
-		# Run the function
-		func_asym_change_crowd_error_stnd = robust_benefits.get_asymptotic_change_in_crowd_error_standardised_expanded(
-			CV_v, cor_v_e_2, cor_v_d_2, mean_e, std_e2, std_d2)
+			
+			# Run the simulation
+			sim_asym_change_indy_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_individual_error_standardised(opinions, W, truth)
 
-		std_e = np.std(e)
+			v = get_eigenweights(W)
+			CV_v = np.std(v)/np.mean(v)
 
-		assert np.isclose(sim_asym_change_crowd_error_stnd, func_asym_change_crowd_error_stnd/ std_e**2)
+			e = opinions - truth
+			e_2 = (opinions - truth)**2
+			d_2 = (opinions - np.mean(opinions))**2
+			cor_v_e_2 = np.corrcoef(v, e_2)[0,1]
+			cor_v_d_2 = np.corrcoef(v, d_2)[0,1]
+			mean_e = np.mean(e)
+
+			std_e2 = np.std(e_2)
+			std_d2 = np.std(d_2)
+
+			std_e = np.std(e)
+			
+			sim_asym_change_indy_error = sim_asym_change_indy_error_stnd * std_e**2
+
+			
+			# Run the function
+			func_asym_change_indy_error = robust_benefits.get_asymptotic_change_in_individual_error_expanded(
+				CV_v, cor_v_e_2, cor_v_d_2, mean_e, std_e2, std_d2, std_e)
+
+
+			
+
+			assert np.isclose(sim_asym_change_indy_error, func_asym_change_indy_error)
+
+
 
 
 if __name__ == '__main__':
