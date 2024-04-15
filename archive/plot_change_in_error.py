@@ -202,4 +202,4 @@ def heatmap_standarised_general():
 	plt.show()
 
 if __name__=="__main__":
-	heatmap_standarised_general()
+	plot_heatmap_standardised_crowd_asymptotic(z=0.2)

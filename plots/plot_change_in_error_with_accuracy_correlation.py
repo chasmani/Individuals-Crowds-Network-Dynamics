@@ -5,7 +5,7 @@ import matplotlib.colors as mcolors
 
 import sys
 sys.path.append("..")
-from robust_benefits import get_asymptotic_change_in_crowd_error_standardised_expanded
+from robust_benefits import get_asymptotic_change_in_crowd_error_expanded
 
 cv= 0.5
 mean_e = 1
@@ -23,9 +23,9 @@ divnorm = mcolors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=2)
 for i, cor_ve2 in enumerate(cor_v_e2s):
 	for j, cor_vd2 in enumerate(cor_v_d2s):
 		
-		delta_error_squared[i, j] = get_asymptotic_change_in_crowd_error_standardised_expanded(cv, cor_ve2, cor_vd2, mean_e, std_e2, std_d2)
+		delta_error_squared[i, j] = get_asymptotic_change_in_crowd_error_expanded(cv, cor_ve2, cor_vd2, mean_e, std_e2, std_d2)
 
-fig = plt.figure(figsize=(10,3))
+fig = plt.figure(figsize=(10,4))
 
 plt.subplot(1, 2, 1)		
 plt.imshow(delta_error_squared, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower',  extent=[-1.5, 1.5, -1.5, 1.5])
