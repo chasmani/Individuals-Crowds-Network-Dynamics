@@ -234,6 +234,95 @@ class TestIndyErrorAsymptoticExpanded(unittest.TestCase):
 
 
 
+class TestCrowdErrorWisdomHerding(unittest.TestCase):
+
+	def test_crowd_error_wisdom_herding(self):
+		"""
+		The actual test.
+		Any method which starts with ``test_`` will considered as a test case.
+		"""
+		for seed in range(10):
+			np.random.seed(seed)
+			n = 100
+			# Random opinions
+			opinions = np.random.rand(n)
+			# Random influnce network
+			W = np.random.rand(n,n)
+			# Standardise the influence network
+			W = W/W.sum(axis=1)[:,None]
+			# Random truth
+			truth = np.random.rand()
+			# Run the simulation
+			sim_asym_change_crowd_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_crowd_error_standardised(opinions, W, truth)
+			
+			v = get_eigenweights(W)
+
+			e = opinions - truth
+			e_2 = (opinions - truth)**2
+			d_2 = (opinions - np.mean(opinions))**2
+			mean_e = np.mean(e)
+
+			cov_v_e2 = np.cov(v, e_2, bias=True)[0,1]
+			cov_v_d2 = np.cov(v, d_2, bias=True)[0,1]
+
+			wisdom = - n * cov_v_e2
+			herding = - n * cov_v_d2
+			
+			# Run the function
+			func_asym_change_crowd_error_w_h = robust_benefits.get_asymptotic_change_in_crowd_error_w_h(
+				wisdom, herding, mean_e)
+
+			std_e = np.std(e)
+
+			sim_asym_change_crowd_error = sim_asym_change_crowd_error_stnd * std_e**2
+
+			assert np.isclose(sim_asym_change_crowd_error, func_asym_change_crowd_error_w_h)
+
+
+
+class TestIndyErrorWisdomHerding(unittest.TestCase):
+
+	def test_indy_error_wisdom_herding(self):
+		"""
+		The actual test.
+		Any method which starts with ``test_`` will considered as a test case.
+		"""
+		for seed in range(10):
+			np.random.seed(seed)
+			n = 100
+			# Random opinions
+			opinions = np.random.rand(n)
+			# Random influnce network
+			W = np.random.rand(n,n)
+			# Standardise the influence network
+			W = W/W.sum(axis=1)[:,None]
+			# Random truth
+			truth = np.random.rand()
+			# Run the simulation
+			sim_asym_change_indy_error_stnd = robust_benefits_sim.sim_asymptotic_change_in_individual_error_standardised(opinions, W, truth)
+			
+			v = get_eigenweights(W)
+
+			e = opinions - truth
+			e_2 = (opinions - truth)**2
+			d_2 = (opinions - np.mean(opinions))**2
+			mean_e = np.mean(e)
+
+			cov_v_e2 = np.cov(v, e_2, bias=True)[0,1]
+			cov_v_d2 = np.cov(v, d_2, bias=True)[0,1]
+
+			wisdom = - n * cov_v_e2
+			herding = - n * cov_v_d2
+
+			std_e = np.std(e)
+			
+			# Run the function
+			func_asym_change_indy_error_w_h = robust_benefits.get_asymptotic_change_in_individual_error_w_h(
+				wisdom, herding, mean_e, std_e)
+
+			sim_asym_change_indy_error = sim_asym_change_indy_error_stnd * std_e**2
+
+			assert np.isclose(sim_asym_change_indy_error, func_asym_change_indy_error_w_h)
 
 if __name__ == '__main__':
 	unittest.main()

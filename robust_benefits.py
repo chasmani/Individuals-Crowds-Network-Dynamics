@@ -9,6 +9,15 @@ def get_asymptotic_change_in_crowd_error_expanded(Cv, cor_v_e_2, cor_v_d_2, mean
     A = std_e2 * cor_v_e_2 - std_d2 * cor_v_d_2
     return Cv**2 * A**2 / (4*mean_e**2) + Cv * A
 
+    
 def get_asymptotic_change_in_individual_error_expanded(Cv, cor_v_e_2, cor_v_d_2, mean_e, std_e2, std_d2, std_e):
     A = std_e2 * cor_v_e_2 - std_d2 * cor_v_d_2
     return Cv**2 * A**2 / (4*mean_e**2) + Cv * A - std_e**2
+
+def get_asymptotic_change_in_crowd_error_w_h(wisdom, herding, mean_e):
+   
+    return (herding-wisdom) * ( 1/(4*mean_e**2) * (herding-wisdom) + 1)
+
+def get_asymptotic_change_in_individual_error_w_h(wisdom, herding, mean_e, std_e):
+   
+    return (herding-wisdom) * ( 1/(4*mean_e**2) * (herding-wisdom) + 1) - std_e**2

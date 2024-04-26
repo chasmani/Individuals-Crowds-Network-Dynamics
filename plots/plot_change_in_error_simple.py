@@ -70,6 +70,7 @@ for k, cv in enumerate(cvs):
 	
 	plt.xlim(min_z, max_z)
 	plt.ylim(min_cor, max_cor)
+	
 
 	if k == 0:
 		plt.ylabel(r"r(v,e)")
