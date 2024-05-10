@@ -13,8 +13,8 @@ cvs = [0, 0.5, 1]
 
 fig = plt.figure(figsize=(10,6))
 
-min_z = -3
-max_z = 3
+min_z = -2
+max_z = 2
 min_cor = -1
 max_cor = 1
 

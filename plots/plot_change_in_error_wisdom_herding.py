@@ -5,13 +5,14 @@ import matplotlib.colors as mcolors
 
 import sys
 sys.path.append("..")
-from robust_benefits import get_asymptotic_change_in_crowd_error_w_h, get_asymptotic_change_in_individual_error_w_h
+from robust_benefits import get_asymptotic_change_in_crowd_error_w_h_standarised, get_asymptotic_change_in_individual_error_w_h_standardised
 
-mean_e = 0.5
+mean_e = 1
 std_e = 1
+z = mean_e/std_e
 
-wisdoms = np.linspace(-1.5,1.5,200)
-herdings = np.linspace(-1.5,1.5,100)
+wisdoms = np.linspace(-1,1,200)
+herdings = np.linspace(-1,1,100)
 
 delta_error_squared_crowd = np.zeros((len(wisdoms), len(herdings)))
 delta_error_squared_indy = np.zeros((len(wisdoms), len(herdings)))
@@ -21,14 +22,13 @@ divnorm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=5)
 for i, wisdom in enumerate(wisdoms):
 	for j, herding in enumerate(herdings):
 		
-		delta_error_squared_crowd[i, j] = get_asymptotic_change_in_crowd_error_w_h(wisdom, herding, mean_e)
-		delta_error_squared_indy[i, j] = get_asymptotic_change_in_individual_error_w_h(wisdom, herding, mean_e, std_e)
+		delta_error_squared_crowd[i, j] = get_asymptotic_change_in_crowd_error_w_h_standarised(wisdom, herding, z)
+		delta_error_squared_indy[i, j] = get_asymptotic_change_in_individual_error_w_h_standardised(wisdom, herding, z)
 
 fig = plt.figure(figsize=(10,4))
 
 plt.subplot(1, 2, 1)		
 plt.imshow(delta_error_squared_crowd, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower', extent=[min(herdings), max(herdings), min(wisdoms), max(wisdoms)])
-
 
 wisdom_boundary_1 = herdings
 wisdom_boundary_2 = herdings + 4*mean_e**2
