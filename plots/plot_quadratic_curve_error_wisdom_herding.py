@@ -2,31 +2,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-wisdom_minus_herdings = np.linspace(-5,5,200)
+alphas = np.linspace(1-,1,200)
 
-z = -1
+zs = [0.25, 0.5, 1]
 
-change_crowd_error = [1/(4*z**2) * beta**2 - beta for beta in wisdom_minus_herdings]
-change_indy_error = [1/(4*z**2) * beta**2 - beta - 1 for beta in wisdom_minus_herdings]
+for k, z in enumerate(zs):
 
-plt.plot(wisdom_minus_herdings, change_crowd_error, label="Crowd", linewidth=3, color="#f39c12")
-plt.plot(wisdom_minus_herdings, change_indy_error, label="Individual", linewidth=3, color="#9b59b6")
+    plt.subplot(1, 3, k+1)
 
-# PLot y = 0 line
-plt.axhline(y=0, color='k', linestyle='--')
+    change_crowd_error = [1/(4*z**2) * alpha**2 + 2*z*alpha for alpha in alphas]
+    change_indy_error = [1/(4*z**2) * alpha**2 + 2*z*alpha - 1 for alpha in alphas]
 
-plt.axvline(x=2*z**2, color="pink", linewidth=3)
+    plt.plot(alphas, change_crowd_error, label="Crowd", linewidth=3, color="#f39c12")
+    plt.plot(alphas, change_indy_error, label="Individual", linewidth=3, color="#9b59b6")
 
-# Remove plot boundary lines
-plt.gca().spines['top'].set_visible(False)
-plt.gca().spines['right'].set_visible(False)
+    # PLot y = 0 line
+    plt.axhline(y=0, color='k', linestyle='--')
+    
+    # Remove plot boundary lines
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
 
 
-plt.legend()
+    plt.legend()
 
-plt.xlabel(r"Wisdom - Herding")
-plt.ylabel(r"Asymptotic Change in Error")
+    plt.xlabel(r"Wisdom - Herding")
+    plt.ylabel(r"Asymptotic Change in Error")
 
-plt.savefig("images/error_curve_wisdom_minus_herding.png", dpi=300)
+plt.savefig("images/error_curves_alpha.png", dpi=300)
 
 plt.show()

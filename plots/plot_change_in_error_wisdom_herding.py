@@ -5,61 +5,78 @@ import matplotlib.colors as mcolors
 
 import sys
 sys.path.append("..")
-from robust_benefits import get_asymptotic_change_in_crowd_error_w_h_standarised, get_asymptotic_change_in_individual_error_w_h_standardised
+from robust_benefits import get_asymptotic_change_in_crowd_error_w_h, get_asymptotic_change_in_indy_error_w_h
 
-mean_e = 1
+# get_asymptotic_change_in_crowd_error_w_h(Cv, calibration, herding, mean_z, std_e2, std_d2, std_e)
+
+
 std_e = 1
-z = mean_e/std_e
+z = 0.1
+cv = 0.5
+std_e2 = 1
+std_d2 = 1
 
-wisdoms = np.linspace(-1,1,200)
+calibrations = np.linspace(-1,1,200)
 herdings = np.linspace(-1,1,100)
 
-delta_error_squared_crowd = np.zeros((len(wisdoms), len(herdings)))
-delta_error_squared_indy = np.zeros((len(wisdoms), len(herdings)))
+delta_error_squared_crowd = np.zeros((len(calibrations), len(herdings)))
+delta_error_squared_indy = np.zeros((len(calibrations), len(herdings)))
 
 divnorm = mcolors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=5)
 
-for i, wisdom in enumerate(wisdoms):
+for i, calibration in enumerate(calibrations):
 	for j, herding in enumerate(herdings):
 		
-		delta_error_squared_crowd[i, j] = get_asymptotic_change_in_crowd_error_w_h_standarised(wisdom, herding, z)
-		delta_error_squared_indy[i, j] = get_asymptotic_change_in_individual_error_w_h_standardised(wisdom, herding, z)
+		delta_error_squared_crowd[i, j] = get_asymptotic_change_in_crowd_error_w_h(cv, calibration, herding, z, std_e2, std_d2, std_e)
+		delta_error_squared_indy[i, j] = get_asymptotic_change_in_indy_error_w_h(cv, calibration, herding, z, std_e2, std_d2, std_e)
 
 fig = plt.figure(figsize=(10,4))
 
 plt.subplot(1, 2, 1)		
-plt.imshow(delta_error_squared_crowd, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower', extent=[min(herdings), max(herdings), min(wisdoms), max(wisdoms)])
+plt.imshow(delta_error_squared_crowd, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower', extent=[min(herdings), max(herdings), min(calibrations), max(calibrations)])
 
-wisdom_boundary_1 = herdings
-wisdom_boundary_2 = herdings + 4*mean_e**2
 
-plt.plot(herdings, wisdom_boundary_1, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
-plt.plot(herdings, wisdom_boundary_2, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
+calibration_boundary_1 = std_d2 / std_e2 * herdings
+plt.plot(herdings, calibration_boundary_1, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
+
+calibration_boundary_2 = -1/std_e2 * (-4*z**2*std_e**2/cv - std_d2*herdings)
+
+plt.plot(herdings, calibration_boundary_2, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
+
+
 
 plt.xlim(min(herdings), max(herdings))
-plt.ylim(min(wisdoms), max(wisdoms))
+plt.ylim(min(calibrations), max(calibrations))
 
 plt.title("Crowd")
-plt.xlabel(r"Herding, $- n cov(v, d^2)$")
-plt.ylabel(r"Wisdom, $- n cov(v, e^2)$")
+plt.xlabel(r"Herding, $- r(v, d^2)$")
+plt.ylabel(r"Calibration, $- r(v, e^2)$")
 
 
 
 plt.subplot(1, 2, 2)		
-plt.imshow(delta_error_squared_indy, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower', extent=[min(herdings), max(herdings), min(wisdoms), max(wisdoms)])
+plt.imshow(delta_error_squared_indy, norm=divnorm, cmap='seismic', interpolation='nearest', aspect='auto', origin='lower', extent=[min(herdings), max(herdings), min(calibrations), max(calibrations)])
 
+beta_1 = -2*z**2 - 2*z*np.sqrt(z**2 + 1)
+
+calibration_boundary_1 = -1/std_e2 * (beta_1**2*std_e**2/cv - std_d2*herdings)
+plt.plot(herdings, calibration_boundary_1, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
+
+
+"""
 wisdom_boundary_1 = herdings + 2 * mean_e**2 + 2*mean_e * np.sqrt(mean_e**2 + std_e**2)
 wisdom_boundary_2 = herdings + 2 * mean_e**2 - 2*mean_e * np.sqrt(mean_e**2 + std_e**2)
 
 plt.plot(herdings, wisdom_boundary_1, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
 plt.plot(herdings, wisdom_boundary_2, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
+"""
 
 plt.xlim(min(herdings), max(herdings))
-plt.ylim(min(wisdoms), max(wisdoms))
+plt.ylim(min(calibrations), max(calibrations))
 
 
 plt.title("Individual")
-plt.xlabel(r"Herding, $- n cov(v, d^2)$")
+plt.xlabel(r"Herding, $- r(v, d^2)$")
 
 plt.tight_layout()
 
@@ -69,6 +86,6 @@ sm = plt.cm.ScalarMappable(cmap='seismic', norm=divnorm)
 sm.set_array([])
 fig.colorbar(sm, cax=cbar_ax)
 
-plt.savefig("images/herding_vs_wisdom.png", dpi=300)
+plt.savefig("images/calibration_and_herding.png", dpi=300)
 
 plt.show()
