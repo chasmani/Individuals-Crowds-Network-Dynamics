@@ -26,3 +26,11 @@ print(std)
 A = 1-1/n
 B = (n-1) * (1/n)**2
 
+for n in range(1,5):
+    influences = np.array([1] + [0]*(n-1))
+    print(influences)
+    print(np.std(influences)*n)
+    print("Cv is ", np.std(influences)/np.mean(influences))
+    
+
+    print("Predicted is ", np.sqrt(n-1))

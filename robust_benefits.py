@@ -27,8 +27,6 @@ def get_asymptotic_change_in_indy_error_w_h(Cv, calibration, herding, mean_z, st
     return  A**2 / (4*mean_z**2) + A - 1
 
 
-
-
 """
 def get_asymptotic_change_in_crowd_error_expanded_standardised(Cv, cor_v_e_2, cor_v_d_2, mean_z, std_e2, std_d2, std_e):
     A = Cv * (std_e2 * cor_v_e_2 - std_d2 * cor_v_d_2)

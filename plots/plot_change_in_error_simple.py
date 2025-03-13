@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import matplotlib.colors as mcolors
+plt.rcParams.update({'font.size': 16})
 
 import sys
 sys.path.append("..")
@@ -9,7 +11,7 @@ from robust_benefits import (
 	get_asymptotic_change_in_individual_error_standardised
 )
 
-cvs = [0, 0.5, 1]
+cvs = [0, 1, 2]
 
 fig = plt.figure(figsize=(10,6))
 
@@ -18,7 +20,11 @@ max_z = 2
 min_cor = -1
 max_cor = 1
 
-divnorm = mcolors.TwoSlopeNorm(vmin=-5, vcenter=0, vmax=5)
+cbar_range = 10
+divnorm = mcolors.SymLogNorm(linthresh=0.1, vmin=-cbar_range, vmax=cbar_range)
+
+cmap = mpl.colormaps.get_cmap('coolwarm')  # viridis is the default colormap for imshow
+	
 
 for k, cv in enumerate(cvs):
 	
@@ -35,7 +41,7 @@ for k, cv in enumerate(cvs):
 
 
 	plt.subplot(2, 3, k+1)
-	plt.imshow(delta_error_crowd, norm=divnorm, cmap='seismic', 
+	plt.imshow(delta_error_crowd, norm=divnorm, cmap=cmap, 
 			   interpolation='nearest', aspect='auto', origin='lower', 
 				 extent=[min_z, max_z, min_cor, max_cor])
 	
@@ -48,17 +54,22 @@ for k, cv in enumerate(cvs):
 	plt.xlim(min_z, max_z)
 	plt.ylim(min_cor, max_cor)
 
+	zs = np.linspace(min_z,max_z,100)
+	cors_alpha_1_iso = -1/(cv * zs)
+
+	#plt.plot(zs, cors_alpha_1_iso, color='white', linewidth=2, linestyle="dotted")  # Use a contrasting color
+
 	
 	if k == 0:
 		plt.ylabel(r"r(v,e)")
 
 	if k == 1:
-		plt.title("Cv = {}\nChange in Crowd Error".format(cv))
+		plt.title("Cv = {}\nChange in Crowd Error".format(cv), pad=20)
 	else:
-		plt.title("Cv = {}\n".format(cv))
+		plt.title("Cv = {}\n ".format(cv))
 
 	plt.subplot(2, 3, k+4)
-	plt.imshow(delta_error_indy, norm=divnorm, cmap='seismic', 
+	plt.imshow(delta_error_indy, norm=divnorm, cmap=cmap, 
 			   interpolation='nearest', aspect='auto', origin='lower', 
 				 extent=[min_z, max_z, min_cor, max_cor])
 	
@@ -79,7 +90,7 @@ for k, cv in enumerate(cvs):
 	plt.xlabel(r"z")
 
 	if k == 1:
-		plt.title("Change in Individual Error")
+		plt.title("Change in Individual Error", pad=20)
 
 
 
@@ -89,9 +100,15 @@ plt.tight_layout()
 
 fig.subplots_adjust(right=0.8)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-sm = plt.cm.ScalarMappable(cmap='seismic', norm=divnorm)
+sm = plt.cm.ScalarMappable(cmap=cmap, norm=divnorm)
 sm.set_array([])
-fig.colorbar(sm, cax=cbar_ax)
+cbar = fig.colorbar(sm, cax=cbar_ax)
+from matplotlib.ticker import ScalarFormatter
+cbar.ax.yaxis.set_major_formatter(ScalarFormatter())
+
+
+
+
 
 plt.savefig("images/robust_benefits.png", dpi=300)
 
