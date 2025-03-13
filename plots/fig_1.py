@@ -157,8 +157,6 @@ def plot_error_beta_areas(cv=1, std_e=1):
 	"""
 	
 
-
-
 def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 
 	e = np.sqrt(e2)
@@ -178,8 +176,7 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		delta_error_crowd = np.zeros((len(cals), len(hs)))
 		delta_error_indy = np.zeros((len(cals), len(hs)))
 
-		
-
+	
 		for i, h in enumerate(hs):
 			for j, cal in enumerate(cals):
 
@@ -227,7 +224,7 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		plt.xlabel(r"Herding, $- r(v, d^2)$")
 
 		if k == 0:
-			plt.title(r"$\Delta$ Group Error, $\bar{e}^2 = 1$")
+			plt.title(r"$\Delta$ Group Error, $\bar{e}^2 = $" + str(e2))
 
 		plt.subplot(2, 3, (3*k)+2)
 		plt.imshow(delta_error_indy, norm=divnorm, cmap=cmap, 
@@ -251,7 +248,7 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		plt.xlabel(r"Herding, $- r(v, d^2)$")
 
 		if k == 0:
-			plt.title(r"$\Delta$ Individual Error, $\bar{e}^2 = 1$")
+			plt.title(r"$\Delta$ Individual Error, $\bar{e}^2 = $" + str(e2))
 
 
 	return cmap, divnorm
