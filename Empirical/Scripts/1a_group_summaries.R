@@ -17,7 +17,7 @@ mycut = function(x) {
   out
 }
 
-mysetupvar="a12345"
+
 
 cols=c(  "pre_influence","post_influence","truth","task"
        , "network", "trial", "dataset", "group_id"
@@ -25,7 +25,7 @@ cols=c(  "pre_influence","post_influence","truth","task"
        )
 
 
-out_d = rbind(
+partially_processed_data = rbind(
     lorenz_2011[, cols] %>% as.data.frame
   , becker_2017[, cols] %>% as.data.frame
   , gurcay_2015[, cols] %>% as.data.frame
@@ -33,102 +33,76 @@ out_d = rbind(
   , silver_2021[, cols] %>% as.data.frame
   , becker_2020[, cols] %>% as.data.frame
 ) %>% 
+  
+  ### we only examine people who give both estimates
   subset(!is.na(pre_influence) & !is.na(post_influence)) %>%
   group_by(task, trial, dataset, network) %>%
+  
+  ## calculate trial-level means for measuring deviance
   mutate(
       mu1 = mean(pre_influence)
-    , toward_truth = ifelse((pre_influence < mean(pre_influence) & mu1 <= truth) | (pre_influence > mu1 & mu1 >= truth), "Away","Toward")
-    , s = var(pre_influence)
-    # , outlierPre = tukey_out(pre_influence)
-    # , outlierPost = tukey_out(post_influence)
   ) %>%
   ungroup %>%
   mutate(
-    # , pre_log_err = log(abs(pre_influence-truth))
-    , pre_sq_err_norm = ((pre_influence-truth)^2)/s
-    # , pre_pct_err = abs(1-(pre_influence/truth))
-    # , pre_log_pct_err = log(pre_pct_err + 0.00001)
+    # individual pre and post squared error and 'herding' distance
+    , pre_err = ((pre_influence-truth)^2)
+    , post_err = ((post_influence-truth)^2)
     
-    # , post_log_err = log(abs(post_influence-truth))
-    , post_sq_err_norm = ((post_influence-truth)^2)/s
-    # , post_pct_err = abs(1-(post_influence/truth))
-    # , post_log_pct_err = log(post_pct_err + 0.00001)
-    # ,ind_sd = sd
-    , pre_err = pre_sq_err_norm
-    , post_err = post_sq_err_norm
+    # initial deviance
+    , pre_deviance = (pre_influence-mu1)^2
     
-    , delta_err = post_err - pre_err
-    , improve = ifelse(delta_err < 0, 1, 0)
-    , not_worse = ifelse(delta_err > 0, 0, 1)
-    # , isOutlier = tukey_out(delta_err)
-    , condition = paste0(dataset, network)
+    # individual change in error
+    , ind_delta_err = post_err - pre_err
+    , improve = ifelse(ind_delta_err < 0, 1, 0)
+    , not_worse = ifelse(ind_delta_err > 0, 0, 1)
     , revised = ifelse(pre_influence == post_influence, 0, 1)
+    
+    # trial details
+    , condition = paste0(dataset, network)
   ) %>% 
   subset(is.finite(pre_err) & is.finite(post_err)) %>%
   group_by(task, trial, dataset, network) %>%
   mutate(
       error_quartile = ntile(pre_err, 4)
     , error_ntile = ntile(pre_err, 6)
-    , calibration = tryCatch({cor.test(pre_err, confidence)$estimate},error=function(cond){NA})
-  )  %>%
-  group_by(task, dataset, network) %>%
-  mutate(
-    , task_calibration = tryCatch({cor.test(pre_err, confidence)$estimate},error=function(cond){NA})
-  )
-  # ungroup %>%
-  # group_by(task, network) %>%
+    # , conf_calibration = tryCatch({cor.test(pre_err, confidence)$estimate},error=function(cond){NA})
+    # , conf_herding = tryCatch({cor.test(pre_dist_from_avg, confidence)$estimate},error=function(cond){NA})
+  )  #%>%
+  # group_by(task, dataset, network) %>%
   # mutate(
-  #   full_task_quartile = ntile(pre_err, 4)
-  # ) %>%
-  # ungroup %>%
-  # group_by(network) %>%
-  # mutate(
-  #   full_error_quartile = ntile(pre_err, 4)
-  # ) %>%
-  # ungroup %>%
-  # group_by(subject) %>%
-  # mutate(
-  #   skill_level = mean(error_ntile)
+    # , task_conf_calibration = tryCatch({cor.test(pre_err, confidence)$estimate},error=function(cond){NA})
+    # , task_conf_herding = tryCatch({cor.test(pre_dist_from_avg, confidence)$estimate},error=function(cond){NA})
   # )
 
 
-
-
-group_d = out_d %>%
+group_data = partially_processed_data %>%
   group_by(task, trial, dataset, network) %>%
   summarize(
       truth = unique(truth)
-    # , totalN=unique(totalN)
     , N = n()
-    , s = var(pre_influence)
-    # , ind_sd = unique(ind_sd)
-    # mean
+    , s_pre = sd(pre_influence)
+    , s_post = sd(post_influence)
+
+    # crowd mean
     , mu1 = mean(pre_influence)
     , mu2 = mean(post_influence)
-    
-    #median
-    # , med1 = median(pre_influence)
-    # , med2 = median(post_influence)
-    
+
     # crowd mean error
-    , crowd_pre_err_mu = ((mu1-truth)^2)/s
-    , crowd_post_err_mu =((mu2-truth)^2)/s
-    
-    # crowd median error
-    # , crowd_pre_err_med = abs(med1-truth)
-    # , crowd_post_err_med = abs(med2-truth)
+    , crowd_pre_err = ((mu1-truth)^2)
+    , crowd_post_err =((mu2-truth)^2)
     
     # change in crowd error
-    , crowd_change_mu = crowd_post_err_mu - crowd_pre_err_mu
-    # , crowd_change_med = crowd_post_err_med - crowd_pre_err_med
-    , crowd_improvement = crowd_change_mu < 0
-    , crowd_not_worse = crowd_change_mu <= 0
+    , crowd_change = crowd_post_err - crowd_pre_err
+    , crowd_change_normalized = crowd_change / ((s_pre^2))
+    , crowd_improvement = crowd_change < 0
+    , crowd_not_worse = crowd_change <= 0
     
     # change in average individual error
-    , mu_ind_change = mean(delta_err)
-    , med_ind_change = median(delta_err)
+    , ind_change = mean(ind_delta_err)
+    , ind_change_normalized = ind_change / ((s_pre^2))
     
-    # , sd_err = sd(pre_log_err)
+    # change in variance/diversity
+    , s_squared_change = (s_post^2) - (s_pre^2)
     
     # percentage improving per trial
     , pct_improve = sum(improve)/n()
@@ -138,70 +112,57 @@ group_d = out_d %>%
     
     # , prop_toward = mean(toward_truth=="Toward")
     
-    , mu_ind_improve = mu_ind_change<0
-    
-    , delta_err_math = crowd_change_mu - mu_ind_change
+    , delta_err_math = ind_change_normalized - crowd_change_normalized
     
     , revised=sum(revised)
     
-    , calibration=unique(calibration)
-    , task_calibration=unique(task_calibration)
+    # , conf_calibration=unique(conf_calibration)
+    # , task_conf_calibration=unique(task_conf_calibration)
+    
+    # , conf_herding = unique(conf_herding)
+    # , task_conf_herding = unique(task_conf_herding)
   ) %>%
   ungroup
 
 
-## TODO testing of calculating revised pct - works here but not with actual data
-# test = data.frame(
-#   belief = rnorm(40, 20, 5)
-#   , belief2 = rnorm(40, 20, 5)
-# ) %>%
-#   mutate(
-#   improve = ifelse(abs(belief2 - belief) > 3, 1, 0)
-#   , not_worse = ifelse(abs(belief2 - belief) > 5, 0, 1)
-#   , revised = rep(c(0,1), 20)
-# )
-# 
-# 
-# summ = test %>%
-#   summarise(
-#     pct_improve = sum(improve)/n()
-#     , pct_not_worse = sum(not_worse)/n()
-#     , pct_improve_revised = sum(revised[improve==1])/sum(revised)
-#     , pct_not_worse_revised = sum(revised[not_worse==1])/sum(revised)
-#   )
-# 
-# summ2 = test %>%
-#   summarise(
-#     pct_improve = sum(improve)/n()
-#     , pct_not_worse = sum(not_worse)/n()
-#     , pct_improve_revised = sum(improve[revised==1])/sum(revised)
-#     , pct_not_worse_revised = sum(not_worse[revised==1])/sum(revised)
-#   )
 
-
-
-## warning message OK -- lowest levels automatically set to 1
-myd=out_d %>%
+## calculate dataframe that holds error quantile for individuals
+## warning message is OK -- lowest levels automatically set to 1
+quantile_table=partially_processed_data %>%
   subset(!is.na(subject))%>%
   ungroup %>%
-  # subset(task=="Columbus") %>% 
-  # group_by(task)%>%
+  group_by(task)%>%
   mutate(
-    err=pre_err
-    ,err_quant=mycut(err)#, breaks=quantile(err, probs=seq(0,1,by=0.25)),
-    # labels=1:4, include.lowest=T)%>%as.numeric
+     err=pre_err
+    ,err_quant=mycut(err)
   )
 
-mything = lapply(unique(myd$subject), function(s){
-  # print(s)
-  dx=myd[which(myd$subject==s),]%>%
-    group_by(task)%>%summarize(err_quant=mean(err_quant))
+
+### for each task, calculate the error quantile on OTHER tasks
+### so we can assign someone a "skill"-like *socially relative* error metric
+### that is not susceptible to Regression-To-The-Mean
+
+skill_calc = lapply(unique(quantile_table)$subject, function(s){
   
+  
+  ### obtain table of error quantile for each independent task
+  dx=quantile_table[which(quantile_table$subject==s),]%>%
+    group_by(task)%>%summarize(err_quant=unique(err_quant))
+  
+  ### get list of tasks for indexing
   tasks=unique(dx$task)
+  
+  ### for each task, obtain average of error quantiles
+  ### for all OTHER tasks
   ds=data.frame(sapply(tasks,function(vt){
+    
+    
+    ### for each tasks, obtain error quantiles of other tasks
     sapply(unique(dx$task[dx$task!=vt]), function(t){
       subset(dx, task==t)$err_quant
-    })%>%as.vector%>%as.numeric%>%mean
+      
+      ### then calculate mean for output
+    })%>%unlist%>%as.vector%>%as.numeric%>%mean
   }))
   
   
@@ -212,4 +173,6 @@ mything = lapply(unique(myd$subject), function(s){
 }) %>%
   do.call(rbind, .)
 
-comb_d=merge(out_d, mything, all=T)
+processed_data=merge(partially_processed_data, skill_calc, all=T)
+
+mysetupvar="a12345"

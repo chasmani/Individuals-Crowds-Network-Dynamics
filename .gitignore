@@ -1,5 +1,8 @@
 .DS_Store
 
+*.png
+*.pptx
+
 # Python
 *.pyc
 __pycache__/
