@@ -128,7 +128,7 @@ def plot_error_beta_areas(cv=1, std_e=1):
 
 	plt.ylim(-2.5, 2.5)
 
-	plt.xlabel(r"Initial Crowd Error, $\bar{e}^2$")
+	plt.xlabel(r"Initial Group Error, $\bar{e}^2$")
 
 	plt.ylabel(r"Calibration Minus Herding")
 
@@ -273,7 +273,7 @@ def plot_heatmaps(cvs=[0.5, 1, 3], e2=1, std_e=1, std_e2=1, std_d2=1):
 
 def plot_figure_1(cvs, std_e, e2):
 
-	fig = plt.figure(figsize=(9,9))
+	fig = plt.figure(figsize=(9,10))
 
 	# cvs = [0.5, 1.5]
 	# std_e = 1
