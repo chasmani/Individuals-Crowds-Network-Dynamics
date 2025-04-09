@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
 
 import matplotlib.colors as mcolors
+from matplotlib.ticker import FuncFormatter
 
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 from robust_benefits import (
 	get_asymptotic_change_in_crowd_error_w_h,
 	get_asymptotic_change_in_indy_error_w_h
@@ -159,7 +160,7 @@ def plot_error_beta_areas(cv=1, std_e=1):
 	"""
 	
 
-def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
+def plot_heatmaps(cvs=[0.5, 1, 3], e2=1, std_e=1, std_e2=1, std_d2=1):
 
 	e = np.sqrt(e2)
 	z = e/std_e
@@ -196,7 +197,7 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 					delta_error_crowd[j, i] = np.nan 
 					delta_error_indy[j, i] = np.nan
 
-		plt.subplot(2, 3, (3*k)+1)
+		plt.subplot(3, 3, (3*k)+1)
 
 		print(np.nanmin((delta_error_indy.flatten())))
 		print(np.nanmax((delta_error_indy.flatten())))
@@ -206,34 +207,11 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 
 		max_abs_val = np.nanmax(np.abs(np.concatenate([delta_error_crowd.flatten(), delta_error_indy.flatten()])))
 
-		#### CUSTOM COLORING BY BECKER ####
+		divnorm = mcolors.SymLogNorm(linthresh=1, linscale=1.0, vmin=-16, vmax=16)
 
-		zeropoint = 0
-		norm_zero = 0.5 #(zeropoint - myvmin) / (myvmax - myvmin)
-
-		# Define the colors you want at specific points
-		colors = ["blue", "white", 'red', '#f542e6', "black"]
-		# Define normalized positions for these colors, ensuring white is at norm_zero
-		# positions = np.array([0, norm_zero, (1 - norm_zero) * (1/4) + norm_zero,
-		# 						(1 - norm_zero) * (2/4) + norm_zero,
-		# 						(1 - norm_zero) * (3/4) + norm_zero, 1])
-
-		# Adjust positions to ensure the transition happens correctly
-		positions = np.array([
-			0,                      # -2 (blue)
-			0.5,                      # 0 (white)
-			0.57,                       # 2 (red)
-			0.79,   # brown
-			1                       # 15 (black)
-		])
-
-		# Create the colormap using these colors and positions
-		cmap = mcolors.LinearSegmentedColormap.from_list("custom_div", list(zip(positions, colors)))
-
-		# Define a normalization that centers zero
-		divnorm = mcolors.TwoSlopeNorm(vmin=myvmin, vcenter=0, vmax=myvmax)
-
-		#### END CUSTOM COLORING BY BECKER ####
+		cmap = mcolors.LinearSegmentedColormap.from_list('custom_seismic',
+												   ["#2980b9", 'white', "#c0392b"],
+												   N=128)
 
 		# divnorm = mcolors.TwoSlopeNorm(vmin=myvmin, vcenter=0, vmax=myvmax)
 		# cmap = mcolors.LinearSegmentedColormap.from_list('custom_div', 
@@ -262,9 +240,9 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		plt.xlabel(r"Herding, $- r(v, d^2)$")
 
 		if k == 0:
-			plt.title(r"$\Delta$ Group Error, $\bar{e}^2 = $" + str(e2))
+			plt.title(r"$\Delta$ Group Error, $\Delta \bar{e}^2$")
 
-		plt.subplot(2, 3, (3*k)+2)
+		plt.subplot(3, 3, (3*k)+2)
 		plt.imshow(delta_error_indy, norm=divnorm, cmap=cmap, 
 				interpolation='nearest', aspect='auto', origin='lower', 
 					extent=[min_h, max_h, min_cal, max_cal])
@@ -286,18 +264,16 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		plt.xlabel(r"Herding, $- r(v, d^2)$")
 
 		if k == 0:
-			plt.title(r"$\Delta$ Individual Error, $\bar{e}^2 = $" + str(e2))
+			plt.title(r"$\Delta$ Individual Error, $\Delta \bar{e^2}$")
 
 
 	return cmap, divnorm
 
 	
 
-
-
 def plot_figure_1(cvs, std_e, e2):
 
-	fig = plt.figure(figsize=(9,6))
+	fig = plt.figure(figsize=(9,9))
 
 	# cvs = [0.5, 1.5]
 	# std_e = 1
@@ -305,14 +281,18 @@ def plot_figure_1(cvs, std_e, e2):
 	
 	cmap, divnorm = plot_heatmaps(cvs=cvs, std_e=std_e, e2=e2)
 
-	plt.subplot(2,3,3)
+	plt.subplot(3,3,3)
 
 	plot_error_beta_areas(cv=cvs[0], std_e=std_e)
 
 	
-	plt.subplot(2,3,6)
+	plt.subplot(3,3,6)
 	
 	plot_error_beta_areas(cv=cvs[1], std_e=std_e)
+
+	plt.subplot(3,3,9)
+	
+	plot_error_beta_areas(cv=cvs[2], std_e=std_e)
 
 
 	axs = fig.get_axes()
@@ -320,10 +300,11 @@ def plot_figure_1(cvs, std_e, e2):
 	axs[0].set_aspect('equal')
 	axs[1].set_aspect('equal')
 	axs[2].set_aspect('equal')
-	
-	axs[2].set_aspect('equal')
 	axs[3].set_aspect('equal')
-
+	axs[4].set_aspect('equal')
+	axs[5].set_aspect('equal')
+	
+	
 
 
 	
@@ -338,33 +319,33 @@ def plot_figure_1(cvs, std_e, e2):
 	sm = plt.cm.ScalarMappable(cmap=cmap, norm=divnorm)
 	sm.set_array([])
 
-	# Add the colorbar to the new axes
-	cbar = fig.colorbar(sm, cax=cbar_ax, orientation='horizontal')
 	
+	cbar = plt.colorbar(sm, cax=cbar_ax, orientation='horizontal')
 
-    # Manually set the tick locations
-	ticks = np.linspace(myvmin, myvmax, num=10) # Get some default ticks
-	np.append(ticks, -1)
-	# ticks = np.sort(np.unique(ticks)) # Sort and remove duplicate
-	# cbar.set_ticks([ticks])
-	custom_ticks = [-2, -1, 0, 1, 2, 10, 15]
-	cbar.set_ticks(custom_ticks)
+	ticks = [-16, -8, -4, -2, 0, 2, 4, 8, 16]
 
-	fig.text(0.02, 0.65, f"Low Centralisation, c$_v$ = {cvs[0]}", rotation=90, va='center', ha='center', fontweight='bold')
+	cbar.set_ticks(ticks)
+
+
+	cbar.ax.xaxis.set_major_formatter(FuncFormatter(lambda val, pos: f'{val:g}'))
+
+	fig.text(0.02, 0.7, f"Low Centralisation, c$_v$ = {cvs[0]}", rotation=90, va='center', ha='center', fontweight='bold')
+	
+	fig.text(0.02, 0.44, f"Medium Centralisation, c$_v$ = {cvs[1]}", rotation=90, va='center', ha='center', fontweight='bold')
 	
 	# For the second row (cv = 2)
-	fig.text(0.02, 0.25, f"HIgh Centralisation, c$_v$ = {cvs[1]}", rotation=90, va='center', ha='center', fontweight='bold')
+	fig.text(0.02, 0.17, f"High Centralisation, c$_v$ = {cvs[2]}", rotation=90, va='center', ha='center', fontweight='bold')
 	
 
 
-	filename = f"../images/fig_1_cvs_{cvs[0]}_{cvs[1]}_std_e_{std_e}_e2_{e2}_colors_{COLOR_SCHEME}.png"
+	filename = f"../../plots/images/fig_1.png"
 	print(filename)
 	plt.savefig(filename, dpi=600)
 
-	# plt.show()
+	plt.show()
 
 if __name__ == "__main__":
-	cvs = [1, 3]
+	cvs = [0.5, 1, 3]
 	std_e = 1
 	e2 = 1
 	myvmin  = -2
