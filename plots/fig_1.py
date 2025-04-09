@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 
 import matplotlib.colors as mcolors
 
+from matplotlib.ticker import FuncFormatter
+
+
 import sys
 sys.path.append("..")
 from robust_benefits import (
@@ -167,7 +170,7 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 	min_cal = -1
 	max_cal = 1
 
-	n  = 100
+	n  = 200
 
 	for k,cv in enumerate(cvs):
 
@@ -196,11 +199,17 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 
 		plt.subplot(2, 3, (3*k)+1)
 
-		divnorm = mcolors.TwoSlopeNorm(vmin=np.nanmin(delta_error_indy), vcenter=0, vmax=np.nanmax(delta_error_crowd))
-		
+		max_abs = np.nanmax(np.abs(delta_error_crowd))
+
+		print(max_abs)
+
+
+		divnorm = mcolors.SymLogNorm(linthresh=1, linscale=1.0, vmin=-16, vmax=16)
 		cmap = mcolors.LinearSegmentedColormap.from_list('custom_seismic', 
-										["#2980b9", "#3498db", 'white', "#e74c3c", "#c0392b"], 
-										N=256)
+										["#2980b9", 'white', "#c0392b"], 
+										N=128)
+		
+
 
 		plt.imshow(delta_error_crowd, norm=divnorm, cmap=cmap, 
 				interpolation='nearest', aspect='auto', origin='lower', 
@@ -261,9 +270,9 @@ def plot_figure_1():
 
 	fig = plt.figure(figsize=(12,8))
 
-	cvs = [0.5, 1.5]
+	cvs = [0.5, 3]
 	std_e = 1
-	e2 = 0.5
+	e2 = 1
 	
 	cmap, divnorm = plot_heatmaps(cvs=cvs, std_e=std_e, e2=e2)
 
@@ -301,14 +310,17 @@ def plot_figure_1():
 	sm.set_array([])
 
 	# Add the colorbar to the new axes
-	cbar = fig.colorbar(sm, cax=cbar_ax, orientation='horizontal')
+	cbar =  plt.colorbar(sm, cax=cbar_ax, orientation='horizontal')
+	ticks = [-16, -8, -4, -2, 0, 2, 4, 8, 16]
+	cbar.set_ticks(ticks)
+	cbar.ax.xaxis.set_major_formatter(FuncFormatter(lambda val, pos: f'{val:g}'))
+
 	
 	fig.text(0.02, 0.65, f"Low Centralisation, c$_v$ = {cvs[0]}", rotation=90, va='center', ha='center', fontweight='bold')
 	
 	# For the second row (cv = 2)
 	fig.text(0.02, 0.25, f"HIgh Centralisation, c$_v$ = {cvs[1]}", rotation=90, va='center', ha='center', fontweight='bold')
 	
-
 
 	plt.savefig("images/fig_1_colors_{}.png".format(COLOR_SCHEME), dpi=600)
 
