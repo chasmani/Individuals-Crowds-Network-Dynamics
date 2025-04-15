@@ -1,21 +1,13 @@
-# PRIVATE_robust_benefits_of_social_exchange
+# Individuals, Crowds, and the Network Dynamics of Belief Accuracy
 
-Code, data and visualisations. 
+Supporting code and data for the publication Pilgrim, C., Becker, J., "Individuals, Crowds, and the Network Dynamics of Belief Accuracy".
 
-## Analytic Functions
+## Theoretical
 
-The main important functions are included in python (robust_benefits.py).
+The Theoretical folder contains code for the main equations presented in the paper. These are rigorously tested against simulations. 
 
-This includes functions to get the asymptotic changes in crowd and indivdiual errror in terms of influence-bias correlations, and alternative functions to find the changes in error in terms of herding/heterodoxy and wisdom/foolishness. 
+The plots folder contains the code to replicate the theoretical plots. 
 
-## Tests
+## Empirical
 
-We include tests of the analytic functions against simulations, in robust_benefits_tests.py. The simulation code is in robust_benefits_sim.py.
-
-## Plots
-
-Functions for plotting results are in the plots folder, which also contains saved plots in the images folder. 
-
-## Archive
-
-This is an archive of code used during development of the main ideas. We included it for reference purposes. 
+The Empirical folder contains the empirical datasets and the code used to analyse them, including to replicate the figure in the main paper. 
