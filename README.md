@@ -4,7 +4,7 @@ Supporting code and data for the publication Pilgrim, C., Becker, J., "Individua
 
 ## Theoretical
 
-The Theoretical folder contains code for the main equations presented in the paper. These are rigorously tested against simulations. 
+The Theoretical folder contains code for the main equations presented in the paper. These are rigorously tested against simulations of DeGroot updating. 
 
 The plots folder contains the code to replicate the theoretical plots. 
 
