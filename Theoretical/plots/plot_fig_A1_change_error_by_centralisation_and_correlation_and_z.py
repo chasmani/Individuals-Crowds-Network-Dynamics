@@ -2,36 +2,40 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.colors as mcolors
+plt.rcParams.update({'font.size': 16})
 
 import sys
 sys.path.append("..")
-from robust_benefits import (
+
+from theoretical_code import (
 	get_asymptotic_change_in_crowd_error_standardised,
 	get_asymptotic_change_in_individual_error_standardised
 )
 
-zs = [0, 1, 2]
+cvs = [0, 0.5, 1]
 
 fig = plt.figure(figsize=(10,6))
 
-min_cv = 0
-max_cv = 5
+min_z = -3
+max_z = 3
 min_cor = -1
 max_cor = 1
 
-cbar_range = 10
-divnorm = mcolors.SymLogNorm(linthresh=0.01, vmin=-cbar_range, vmax=cbar_range)
 
 cmap = mpl.colormaps.get_cmap('coolwarm')  # viridis is the default colormap for imshow
 	
-for k, z in enumerate(zs):
-	
-	cvs = np.linspace(min_cv,max_cv,100)
-	cor_ves = np.linspace(min_cor,max_cor,200)
-	delta_error_crowd = np.zeros((len(cor_ves), len(cvs)))
-	delta_error_indy = np.zeros((len(cor_ves), len(cvs)))
+cbar_range = 5
 
-	for i, cv in enumerate(cvs):
+divnorm = mcolors.SymLogNorm(linthresh=1, linscale=1.0, vmin=-cbar_range, vmax=cbar_range)
+
+for k, cv in enumerate(cvs):
+	
+	zs = np.linspace(min_z,max_z,100)
+	cor_ves = np.linspace(min_cor,max_cor,200)
+	delta_error_crowd = np.zeros((len(cor_ves), len(zs)))
+	delta_error_indy = np.zeros((len(cor_ves), len(zs)))
+
+	for i, z in enumerate(zs):
 		for j, cor_ve in enumerate(cor_ves):
 			delta_error_crowd[j, i] = get_asymptotic_change_in_crowd_error_standardised(cv, cor_ve, z)    
 			delta_error_indy[j, i] = get_asymptotic_change_in_individual_error_standardised(cv, cor_ve, z)
@@ -41,55 +45,43 @@ for k, z in enumerate(zs):
 	plt.subplot(2, 3, k+1)
 	plt.imshow(delta_error_crowd, norm=divnorm, cmap=cmap, 
 			   interpolation='nearest', aspect='auto', origin='lower', 
-				 extent=[min_cv, max_cv, min_cor, max_cor])
+				 extent=[min_z, max_z, min_cor, max_cor])
 	
-	"""
 	if cv > 0:
 		cor_boundary_1 = 0 * zs
 		cor_boundary_2 = -2 * zs / cv
 		plt.plot(zs, cor_boundary_1, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
 		plt.plot(zs, cor_boundary_2, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
 	
-	"""
-	if z > 0:
-		for alpha in np.arange(-20, 20, 1):
-			cor_alpha_iso = alpha/(cvs * z)
-			plt.plot(cvs, cor_alpha_iso, color='white', linewidth=1, linestyle="dashed", alpha=0.5)
-
-
-	plt.xlim(min_cv, max_cv)
+	plt.xlim(min_z, max_z)
 	plt.ylim(min_cor, max_cor)
+
+	zs = np.linspace(min_z,max_z,100)
+	cors_alpha_1_iso = -1/(cv * zs)
+
+	#plt.plot(zs, cors_alpha_1_iso, color='white', linewidth=2, linestyle="dotted")  # Use a contrasting color
 
 	
 	if k == 0:
 		plt.ylabel(r"r(v,e)")
 
 	if k == 1:
-		plt.title("z = {}\nChange in Crowd Error".format(z))
+		plt.title("Cv = {}\nChange in Crowd Error".format(cv), pad=20)
 	else:
-		plt.title("z = {}\n".format(z))
+		plt.title("Cv = {}\n ".format(cv))
 
 	plt.subplot(2, 3, k+4)
 	plt.imshow(delta_error_indy, norm=divnorm, cmap=cmap, 
 			   interpolation='nearest', aspect='auto', origin='lower', 
-				 extent=[min_cv, max_cv, min_cor, max_cor])
+				 extent=[min_z, max_z, min_cor, max_cor])
 	
-	"""
 	if cv > 0:
 		cor_boundary_1 = np.array([-z + np.sqrt(z**2 + 1) for z in zs])/cv
 		cor_boundary_2 = np.array([-z - np.sqrt(z**2 + 1) for z in zs])/cv
 		plt.plot(zs, cor_boundary_1, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
 		plt.plot(zs, cor_boundary_2, color='#404040', linewidth=2, linestyle="dashed")  # Use a contrasting color
-	"""
-
-	if z > 0:
-		for alpha in np.arange(-20, 20, 1):
-			cor_alpha_iso = alpha/(cvs * z)
-			plt.plot(cvs, cor_alpha_iso, color='white', linewidth=1, linestyle="dashed", alpha=0.5)
-
-
-		
-	plt.xlim(min_cv, max_cv)
+	
+	plt.xlim(min_z, max_z)
 	plt.ylim(min_cor, max_cor)
 	
 
@@ -97,10 +89,10 @@ for k, z in enumerate(zs):
 		plt.ylabel(r"r(v,e)")
 
 	
-	plt.xlabel(r"$c_v$")
+	plt.xlabel(r"z")
 
 	if k == 1:
-		plt.title("Change in Individual Error")
+		plt.title("Change in Individual Error", pad=20)
 
 
 
@@ -117,7 +109,10 @@ from matplotlib.ticker import ScalarFormatter
 cbar.ax.yaxis.set_major_formatter(ScalarFormatter())
 
 
-plt.savefig("images/robust_benefits_by_z.png", dpi=300)
+
+
+
+#plt.savefig("images/robust_benefits.png", dpi=300)
 
 
 plt.show()

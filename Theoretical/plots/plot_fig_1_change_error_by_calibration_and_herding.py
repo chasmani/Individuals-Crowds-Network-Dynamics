@@ -2,16 +2,21 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+plt.rcParams['font.family'] = 'Arial'
 
 import matplotlib.colors as mcolors
+from matplotlib.ticker import FuncFormatter
 
 import sys
 sys.path.append("..")
-from robust_benefits import (
-	get_asymptotic_change_in_crowd_error_w_h,
-	get_asymptotic_change_in_indy_error_w_h
+
+from theoretical_code import (
+	get_asymptotic_change_in_crowd_error_calibration_herding,
+	get_asymptotic_change_in_individual_error_calibration_herding
 )
+
+COLOR_GOOD = "#2980b9"
+COLOR_BAD = "#c0392b"
 
 CROWD_ZERO_COLOR = "#404040"
 CROWD_ZERO_STYLE = "dashed"
@@ -21,13 +26,29 @@ INDY_ZERO_COLOR = "#404040"
 INDY_ZERO_STYLE = "dotted"
 INDY_ZERO_WIDTH = 2
 
-COLOR_BOTH_IMPROVE = 'grey'
-COLOR_BOTH_WORSE = 'lightgrey'
-COLOR_INDY_IMPROVE_CROWD_WORSE =  'white'
 
-HATCH_BOTH_IMPROVE = 'xxx'
-HATCH_BOTH_WORSE = '...'
-HATCH_INDY_IMPROVE_CROWD_WORSE = 'xxx'
+COLOR_SCHEME = "color"
+
+if COLOR_SCHEME == "grey":
+	COLOR_BOTH_IMPROVE = 'grey'
+	COLOR_BOTH_WORSE = 'lightgrey'
+	COLOR_INDY_IMPROVE_CROWD_WORSE =  'white'
+
+	HATCH_BOTH_IMPROVE = 'xxx'
+	HATCH_BOTH_WORSE = '...'
+	HATCH_INDY_IMPROVE_CROWD_WORSE = 'xxx'
+
+else:
+	COLOR_BOTH_IMPROVE = '#2ecc71'
+	COLOR_INDY_IMPROVE_CROWD_WORSE =  '#f1c40f'
+	COLOR_BOTH_WORSE = '#9b59b6'
+
+	HATCH_BOTH_IMPROVE = ''
+	HATCH_BOTH_WORSE = ''
+	HATCH_INDY_IMPROVE_CROWD_WORSE = ''
+
+myvmin = -2
+myvmax = 2
 
 
 def get_indy_zero_beta_plus(e2, cv):
@@ -98,7 +119,7 @@ def plot_error_beta_areas(cv=1, std_e=1):
 	plt.plot(e2s, crowd_zero_beta_minus_1, label="Crowd Zero Beta -1", color=CROWD_ZERO_COLOR, linestyle=CROWD_ZERO_STYLE, linewidth=CROWD_ZERO_WIDTH)
 
 	indy_zero_beta_minus = np.where(indy_zero_beta_minus > max_abs_c_minus_h, np.nan, indy_zero_beta_minus)
-	indy_zero_beta_plus = np.where(indy_zero_beta_plus > max_abs_c_minus_h, np.nan, indy_zero_beta_plus)
+	indy_zero_beta_plus = np.where(indy_zero_beta_plus < -max_abs_c_minus_h, np.nan, indy_zero_beta_plus)
 
 	plt.plot(e2s, indy_zero_beta_minus, label="Indy Zero Beta -", color=INDY_ZERO_COLOR, linestyle=INDY_ZERO_STYLE, linewidth=INDY_ZERO_WIDTH)
 	plt.plot(e2s, indy_zero_beta_plus, label="Indy Zero Beta +", color=INDY_ZERO_COLOR, linestyle=INDY_ZERO_STYLE, linewidth=INDY_ZERO_WIDTH)
@@ -108,7 +129,7 @@ def plot_error_beta_areas(cv=1, std_e=1):
 
 	plt.ylim(-2.5, 2.5)
 
-	plt.xlabel(r"Initial Crowd Error, $\bar{e}^2$")
+	plt.xlabel(r"Initial Group Error, $\bar{e}^2$")
 
 	plt.ylabel(r"Calibration Minus Herding")
 
@@ -140,9 +161,7 @@ def plot_error_beta_areas(cv=1, std_e=1):
 	"""
 	
 
-
-
-def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
+def plot_heatmaps(cvs=[0.5, 1, 3], e2=1, std_e=1, std_e2=1, std_d2=1):
 
 	e = np.sqrt(e2)
 	z = e/std_e
@@ -152,9 +171,7 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 	min_cal = -1
 	max_cal = 1
 
-	n  = 1000
-
-	divnorm = mcolors.TwoSlopeNorm(vmin=-2, vcenter=0, vmax=2)
+	n  = 100
 
 	for k,cv in enumerate(cvs):
 
@@ -163,6 +180,7 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		delta_error_crowd = np.zeros((len(cals), len(hs)))
 		delta_error_indy = np.zeros((len(cals), len(hs)))
 
+	
 		for i, h in enumerate(hs):
 			for j, cal in enumerate(cals):
 
@@ -172,16 +190,49 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 
 				if np.abs(cal_minus_h) < abs_max_cal_minus_h:		
 
-					delta_error_crowd[j, i] = get_asymptotic_change_in_crowd_error_w_h(cv, cal, h, z, std_e2, std_d2, std_e)   
-					delta_error_indy[j, i] = get_asymptotic_change_in_indy_error_w_h(cv, cal, h, z, std_e2, std_d2, std_e) 
+					delta_error_crowd[j, i] = get_asymptotic_change_in_crowd_error_calibration_herding(
+						cv = cv, 
+						initial_crowd_bias = z, 
+						s_d2=std_d2, 
+						herding=h, 
+						s_e2=std_e2, 
+						calibration=cal)   
+					delta_error_indy[j, i] = get_asymptotic_change_in_individual_error_calibration_herding(
+						cv = cv, 
+						initial_crowd_bias = z, 
+						s_d2=std_d2, 
+						herding=h, 
+						s_e2=std_e2, 
+						calibration=cal,
+						s_e=std_e) 
 
 				else:
 					
 					delta_error_crowd[j, i] = np.nan 
 					delta_error_indy[j, i] = np.nan
 
-		plt.subplot(2, 3, (3*k)+1)
-		plt.imshow(delta_error_crowd, norm=divnorm, cmap='seismic', 
+		plt.subplot(3, 3, (3*k)+1)
+
+		print(np.nanmin((delta_error_indy.flatten())))
+		print(np.nanmax((delta_error_indy.flatten())))
+		# print(np.nanmin((delta_error_crowd.flatten())))
+		# print(np.nanmax((delta_error_crowd.flatten())))
+		print(f"Range of delta_error_crowd (cv={cv}): [{np.nanmin(delta_error_crowd):.2f}, {np.nanmax(delta_error_crowd):.2f}]")
+
+		max_abs_val = np.nanmax(np.abs(np.concatenate([delta_error_crowd.flatten(), delta_error_indy.flatten()])))
+
+		divnorm = mcolors.SymLogNorm(linthresh=1, linscale=1.0, vmin=-16, vmax=16)
+
+		cmap = mcolors.LinearSegmentedColormap.from_list('custom_seismic',
+												   ["#2980b9", 'white', "#c0392b"],
+												   N=128)
+
+		# divnorm = mcolors.TwoSlopeNorm(vmin=myvmin, vcenter=0, vmax=myvmax)
+		# cmap = mcolors.LinearSegmentedColormap.from_list('custom_div', 
+		# 										['black','purple', '#294db9', '#2980b9', 'white', '#ff6d33', '#cc3923', 'brown',"black"], 
+		# 										N=256)
+		
+		plt.imshow(delta_error_crowd, norm=divnorm, cmap=cmap, 
 				interpolation='nearest', aspect='auto', origin='lower', 
 					extent=[min_h, max_h, min_cal, max_cal])
 
@@ -203,10 +254,10 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		plt.xlabel(r"Herding, $- r(v, d^2)$")
 
 		if k == 0:
-			plt.title(r"$\Delta$ Group Error")
-		
-		plt.subplot(2, 3, (3*k)+2)
-		plt.imshow(delta_error_indy, norm=divnorm, cmap='seismic', 
+			plt.title(r"$\Delta$ Group Error, $\Delta \bar{e}^2$")
+
+		plt.subplot(3, 3, (3*k)+2)
+		plt.imshow(delta_error_indy, norm=divnorm, cmap=cmap, 
 				interpolation='nearest', aspect='auto', origin='lower', 
 					extent=[min_h, max_h, min_cal, max_cal])
 
@@ -227,65 +278,88 @@ def plot_heatmaps(cvs=[0.5, 3], e2=0.5, std_e=1, std_e2=1, std_d2=1):
 		plt.xlabel(r"Herding, $- r(v, d^2)$")
 
 		if k == 0:
-			plt.title(r"$\Delta$ Individual Error")
+			plt.title(r"$\Delta$ Individual Error, $\Delta \bar{e^2}$")
 
 
-	return divnorm
+	return cmap, divnorm
 
 	
 
+def plot_figure_1(cvs, std_e, e2):
 
+	fig = plt.figure(figsize=(9,10))
 
-def plot_figure_1():
-
-	fig = plt.figure(figsize=(14,8))
-
-	cvs = [1, 2]
-	std_e = 1
-	e2 = 0.5
+	# cvs = [0.5, 1.5]
+	# std_e = 1
+	# e2 = 0.5
 	
-	
-	divnorm = plot_heatmaps(cvs=cvs, std_e=std_e, e2=e2)
+	cmap, divnorm = plot_heatmaps(cvs=cvs, std_e=std_e, e2=e2)
 
-	plt.subplot(2,3,3)
-	
+	plt.subplot(3,3,3)
+
 	plot_error_beta_areas(cv=cvs[0], std_e=std_e)
+
 	
-	plt.subplot(2,3,6)
+	plt.subplot(3,3,6)
 	
 	plot_error_beta_areas(cv=cvs[1], std_e=std_e)
+
+	plt.subplot(3,3,9)
+	
+	plot_error_beta_areas(cv=cvs[2], std_e=std_e)
 
 
 	axs = fig.get_axes()
 
 	axs[0].set_aspect('equal')
 	axs[1].set_aspect('equal')
-	
 	axs[2].set_aspect('equal')
 	axs[3].set_aspect('equal')
+	axs[4].set_aspect('equal')
+	axs[5].set_aspect('equal')
+	
+	
 
 
 	
 
 	plt.tight_layout()
-	plt.subplots_adjust(top=0.8)  # Make space at the top
+	plt.subplots_adjust(top=0.8, left=0.15)  # Make space at the top
 
 	# Create a new axes for the colorbar at the top
 	cbar_ax = fig.add_axes([0.15, 0.9, 0.4, 0.03])  # [left, bottom, width, height]
 
 	# Create the colorbar using the same normalization as the plots
-	sm = plt.cm.ScalarMappable(cmap='seismic', norm=divnorm)
+	sm = plt.cm.ScalarMappable(cmap=cmap, norm=divnorm)
 	sm.set_array([])
 
-	# Add the colorbar to the new axes
-	cbar = fig.colorbar(sm, cax=cbar_ax, orientation='horizontal')
 	
-	plt.savefig("images/fig_1.png", dpi=600)
+	cbar = plt.colorbar(sm, cax=cbar_ax, orientation='horizontal')
 
-	plt.show()
+	ticks = [-16, -8, -4, -2, 0, 2, 4, 8, 16]
+
+	cbar.set_ticks(ticks)
+
+
+	cbar.ax.xaxis.set_major_formatter(FuncFormatter(lambda val, pos: f'{val:g}'))
+
+	fig.text(0.02, 0.7, f"Low Centralisation, c$_v$ = {cvs[0]}", rotation=90, va='center', ha='center', fontweight='bold')
 	
+	fig.text(0.02, 0.44, f"Medium Centralisation, c$_v$ = {cvs[1]}", rotation=90, va='center', ha='center', fontweight='bold')
+	
+	# For the second row (cv = 2)
+	fig.text(0.02, 0.17, f"High Centralisation, c$_v$ = {cvs[2]}", rotation=90, va='center', ha='center', fontweight='bold')
+	
+	plt.show()
+
 if __name__ == "__main__":
-	plot_figure_1()
+	cvs = [0.5, 1, 3]
+	std_e = 1
+	e2 = 1
+	myvmin  = -2
+	myvmax = 15
+
+	plot_figure_1(cvs, std_e, e2)
 
 
 	
