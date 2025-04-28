@@ -7,6 +7,9 @@ plt.rcParams['font.family'] = 'Arial'
 import matplotlib.colors as mcolors
 from matplotlib.ticker import FuncFormatter
 
+from matplotlib.ticker import FuncFormatter
+
+
 import sys
 sys.path.append("..")
 
@@ -171,7 +174,7 @@ def plot_heatmaps(cvs=[0.5, 1, 3], e2=1, std_e=1, std_e2=1, std_d2=1):
 	min_cal = -1
 	max_cal = 1
 
-	n  = 100
+	n  = 200
 
 	for k,cv in enumerate(cvs):
 
@@ -213,6 +216,7 @@ def plot_heatmaps(cvs=[0.5, 1, 3], e2=1, std_e=1, std_e2=1, std_d2=1):
 
 		plt.subplot(3, 3, (3*k)+1)
 
+<<<<<<< HEAD:Theoretical/plots/plot_fig_1_change_error_by_calibration_and_herding.py
 		print(np.nanmin((delta_error_indy.flatten())))
 		print(np.nanmax((delta_error_indy.flatten())))
 		# print(np.nanmin((delta_error_crowd.flatten())))
@@ -220,6 +224,19 @@ def plot_heatmaps(cvs=[0.5, 1, 3], e2=1, std_e=1, std_e2=1, std_d2=1):
 		print(f"Range of delta_error_crowd (cv={cv}): [{np.nanmin(delta_error_crowd):.2f}, {np.nanmax(delta_error_crowd):.2f}]")
 
 		max_abs_val = np.nanmax(np.abs(np.concatenate([delta_error_crowd.flatten(), delta_error_indy.flatten()])))
+=======
+		max_abs = np.nanmax(np.abs(delta_error_crowd))
+
+		print(max_abs)
+
+
+		divnorm = mcolors.SymLogNorm(linthresh=1, linscale=1.0, vmin=-16, vmax=16)
+		cmap = mcolors.LinearSegmentedColormap.from_list('custom_seismic', 
+										["#2980b9", 'white', "#c0392b"], 
+										N=128)
+		
+
+>>>>>>> 083e8517c9445e7b96cf29632e2b1a17af00e0b6:plots/fig_1.py
 
 		divnorm = mcolors.SymLogNorm(linthresh=1, linscale=1.0, vmin=-16, vmax=16)
 
@@ -289,9 +306,19 @@ def plot_figure_1(cvs, std_e, e2):
 
 	fig = plt.figure(figsize=(9,10))
 
+<<<<<<< HEAD:Theoretical/plots/plot_fig_1_change_error_by_calibration_and_herding.py
 	# cvs = [0.5, 1.5]
 	# std_e = 1
 	# e2 = 0.5
+=======
+def plot_figure_1():
+
+	fig = plt.figure(figsize=(12,8))
+
+	cvs = [0.5, 3]
+	std_e = 1
+	e2 = 1
+>>>>>>> 083e8517c9445e7b96cf29632e2b1a17af00e0b6:plots/fig_1.py
 	
 	cmap, divnorm = plot_heatmaps(cvs=cvs, std_e=std_e, e2=e2)
 
@@ -333,12 +360,30 @@ def plot_figure_1(cvs, std_e, e2):
 	sm = plt.cm.ScalarMappable(cmap=cmap, norm=divnorm)
 	sm.set_array([])
 
+<<<<<<< HEAD:Theoretical/plots/plot_fig_1_change_error_by_calibration_and_herding.py
+=======
+	# Add the colorbar to the new axes
+	cbar =  plt.colorbar(sm, cax=cbar_ax, orientation='horizontal')
+	ticks = [-16, -8, -4, -2, 0, 2, 4, 8, 16]
+	cbar.set_ticks(ticks)
+	cbar.ax.xaxis.set_major_formatter(FuncFormatter(lambda val, pos: f'{val:g}'))
+
+	
+	fig.text(0.02, 0.65, f"Low Centralisation, c$_v$ = {cvs[0]}", rotation=90, va='center', ha='center', fontweight='bold')
+	
+	# For the second row (cv = 2)
+	fig.text(0.02, 0.25, f"HIgh Centralisation, c$_v$ = {cvs[1]}", rotation=90, va='center', ha='center', fontweight='bold')
+>>>>>>> 083e8517c9445e7b96cf29632e2b1a17af00e0b6:plots/fig_1.py
 	
 	cbar = plt.colorbar(sm, cax=cbar_ax, orientation='horizontal')
 
+<<<<<<< HEAD:Theoretical/plots/plot_fig_1_change_error_by_calibration_and_herding.py
 	ticks = [-16, -8, -4, -2, 0, 2, 4, 8, 16]
 
 	cbar.set_ticks(ticks)
+=======
+	plt.savefig("images/fig_1_colors_{}.png".format(COLOR_SCHEME), dpi=600)
+>>>>>>> 083e8517c9445e7b96cf29632e2b1a17af00e0b6:plots/fig_1.py
 
 
 	cbar.ax.xaxis.set_major_formatter(FuncFormatter(lambda val, pos: f'{val:g}'))
