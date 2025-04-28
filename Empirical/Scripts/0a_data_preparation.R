@@ -139,4 +139,3 @@ if(!file.exists("../data/becker_2020.csv")){
 } else {
   becker_2020 = read.csv("../data/becker_2020.csv", stringsAsFactors=F)
 }
-
